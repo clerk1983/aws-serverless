@@ -1,19 +1,35 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
+  SAM Template for a web application with S3, API Gateway, Lambda, and DynamoDB.
 
 Resources:
   # S3 Bucket for hosting the static website
   FrontEndBucket:
     Type: AWS::S3::Bucket
     Properties:
-      AccessControl: PublicRead
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerPreferred # または 'ObjectWriter' など他のオプションを選択
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+    DeletionPolicy: Retain # S3バケットを削除しないように設定
+    UpdateReplacePolicy: Retain # 置き換え時もリソースを保持
+
+  # BucketPolicy for the S3 bucket to allow public access
+  FrontEndBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontEndBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "arn:aws:s3:::${FrontEndBucket}/*"
 
   # Lambda function for handling API requests
   BackendFunction:
@@ -43,6 +59,8 @@ Resources:
         - AttributeName: id
           KeyType: HASH
       BillingMode: PAY_PER_REQUEST
+    DeletionPolicy: Retain # DynamoDBテーブルを削除しないように設定
+    UpdateReplacePolicy: Retain # 置き換え時もリソースを保持
 
 Outputs:
   WebsiteURL:
@@ -51,9 +69,3 @@ Outputs:
   ApiEndpoint:
     Value: !Sub "https://${BackendFunction}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
     Description: API Gateway endpoint URL
-
-Metadata:
-  AWS::Serverless::Application:
-    S3Deployment:
-      BucketName: !Ref FrontEndBucket
-      SourcePath: ./frontend/static
