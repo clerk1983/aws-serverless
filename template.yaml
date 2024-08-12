@@ -8,12 +8,18 @@ Resources:
   FrontEndBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !Sub "${AWS::StackName}-frontend-s3-${AWS::Region}-${AWS::AccountId}"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
       OwnershipControls:
         Rules:
           - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
     DeletionPolicy: Retain # S3バケットを削除しないように設定
     UpdateReplacePolicy: Retain # 置き換え時もリソースを保持
 
@@ -52,6 +58,7 @@ Resources:
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: serverless-tasks
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
