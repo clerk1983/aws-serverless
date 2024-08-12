@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+
+Resources:
+  # S3 Bucket for hosting the static website
+  FrontEndBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred # または 'ObjectWriter' など他のオプションを選択
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  # Lambda function for handling API requests
+  BackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs20.x
+      CodeUri: ./backend/
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DynamoDBTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+  # DynamoDB table for storing data
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  WebsiteURL:
+    Value: !Sub "http://${FrontEndBucket}.s3-website-${AWS::Region}.amazonaws.com/"
+    Description: URL for the static website
+  ApiEndpoint:
+    Value: !Sub "https://${BackendFunction}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Description: API Gateway endpoint URL
+
+Metadata:
+  AWS::Serverless::Application:
+    S3Deployment:
+      BucketName: !Ref FrontEndBucket
+      SourcePath: ./frontend/static
