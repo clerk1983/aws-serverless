@@ -37,7 +37,7 @@ Resources:
     Properties:
       Handler: app.handler
       Runtime: nodejs20.x
-      CodeUri: ./backend/
+      CodeUri: ./backend/src/
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBTable
