@@ -38,12 +38,12 @@ Resources:
             Resource: !Sub "arn:aws:s3:::${FrontEndBucket}/*"
 
   # Lambda function for handling API requests
-  BackendFunction:
+  TasksGetFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: tasks.handler
+      Handler: index.handler
       Runtime: nodejs20.x
-      CodeUri: ./backend/src/
+      CodeUri: ./backend/src/tasks-get
       Role: !GetAtt BackendFunctionExecutionRole.Arn
       Environment:
         Variables:
@@ -54,7 +54,26 @@ Resources:
           Properties:
             RestApiId: !Ref BackendFunctionApi
             Path: /tasks/{id}
-            Method: ANY
+            Method: GET
+
+  # Lambda function for handling POST requests
+  TasksPostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs20.x
+      CodeUri: ./backend/src/tasks-post
+      Role: !GetAtt BackendFunctionExecutionRole.Arn
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DynamoDBTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BackendFunctionApi
+            Path: /tasks
+            Method: POST
 
   BackendFunctionApi:
     Type: AWS::Serverless::Api
