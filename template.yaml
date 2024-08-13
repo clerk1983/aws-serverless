@@ -1,83 +1,111 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: |
-  SAM Template for a web application with S3, API Gateway, Lambda, and DynamoDB.
+Description: CloudFormation Template for a web application with S3, API Gateway,
+  Lambda, and DynamoDB.
 
 Resources:
   # S3 Bucket for hosting the static website
   FrontEndBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${AWS::StackName}-frontend-s3-${AWS::Region}-${AWS::AccountId}
+      BucketName: !Sub ${AWS::StackName}-frontend-s3-${AWS::Region}-${AWS::AccountId} # Unique bucket name based on stack name, region, and account ID
       WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: error.html
+        IndexDocument: index.html # The main entry point for the website
+        ErrorDocument: error.html # The error page for the website
       OwnershipControls:
         Rules:
-          - ObjectOwnership: BucketOwnerPreferred
+          - ObjectOwnership: BucketOwnerPreferred # Ensure bucket owner has control over the objects
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
+        BlockPublicAcls: false # Allow public access to the bucket
         IgnorePublicAcls: false
         BlockPublicPolicy: false
         RestrictPublicBuckets: false
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain # Prevent the bucket from being deleted when the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the bucket even if the resource is replaced
 
-  # BucketPolicy for the S3 bucket to allow public access
+  # Bucket policy to allow public access to the S3 bucket
   FrontEndBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref FrontEndBucket
+      Bucket: !Ref FrontEndBucket # Reference to the S3 bucket defined above
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Sid: PublicReadGetObject
             Effect: Allow
-            Principal: '*'
-            Action: s3:GetObject
-            Resource: !Sub arn:aws:s3:::${FrontEndBucket}/*
+            Principal: '*' # Allow access to everyone
+            Action: s3:GetObject # Permission to read objects
+            Resource: !Sub arn:${AWS::Partition}:s3:::${FrontEndBucket}/* # Target all objects in the bucket
 
-  # S3 Bucket for hosting the OpenAPI file (private)
+  # S3 Bucket for hosting backend resources (e.g., Lambda code)
   BackendS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${AWS::StackName}-backend-s3-${AWS::Region}-${AWS::AccountId}
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+      BucketName: !Sub ${AWS::StackName}-backend-s3-${AWS::Region}-${AWS::AccountId} # Unique bucket name for backend resources
+    DeletionPolicy: Retain # Prevent the bucket from being deleted when the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the bucket even if the resource is replaced
 
-  # S3 Bucket Policy to restrict public access
+  # Bucket policy to deny public access to the backend S3 bucket
   BackendS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref BackendS3Bucket
+      Bucket: !Ref BackendS3Bucket # Reference to the backend S3 bucket
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Sid: DenyPublicAccess
             Effect: Deny
-            Principal: '*'
-            Action:
-              - s3:GetObject
-            Resource: !Sub arn:aws:s3:::${BackendS3Bucket}/*
+            Principal: '*' # Apply to everyone
+            Action: s3:GetObject # Deny read access
+            Resource: !Sub arn:${AWS::Partition}:s3:::${BackendS3Bucket}/* # Target all objects in the bucket
             Condition:
               Bool:
-                aws:SecureTransport: 'false'
+                aws:SecureTransport: 'false' # Allow only secure (HTTPS) access
 
-  # ApiGateway
+  # API Gateway definition for the backend service
   BackendFunctionApi:
-    Type: AWS::Serverless::Api
+    Type: AWS::ApiGateway::RestApi
     Properties:
-      StageName: Prod
-      # DefinitionBody:
-      #   Fn::Transform:
-      #     Name: AWS::Include
-      #     Parameters:
-      #       Location: ./doc/110-open-api.yaml
-      Cors:
-        AllowMethods: '''GET,POST,PUT,DELETE,OPTIONS'''
-        AllowHeaders: '''Content-Type'''
-        AllowOrigin: '''*'''
+      Name: serverless-backend-api # Name of the API Gateway
+      Description: An API to interact with the Lambda function # Description of the API Gateway
+      EndpointConfiguration:
+        Types:
+          - REGIONAL # Deploy the API in a specific AWS region
 
+  # API Gateway resource to define the /tasks path
+  ApiGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt BackendFunctionApi.RootResourceId # Attach this resource to the root of the API Gateway
+      PathPart: tasks # Define the /tasks path
+      RestApiId: !Ref BackendFunctionApi # Reference the API Gateway
+
+  # GET method for the /tasks/{id} resource in API Gateway
+  ApiGatewayMethodGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # No authorization required
+      HttpMethod: GET # Use the GET HTTP method
+      ResourceId: !Ref ApiGatewayResource # Attach to the /tasks resource
+      RestApiId: !Ref BackendFunctionApi # Reference the API Gateway
+      Integration:
+        Type: AWS_PROXY # Use Lambda proxy integration
+        IntegrationHttpMethod: POST # Use POST to invoke the Lambda function
+        Uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TasksGetFunction.Arn}/invocations # Invoke the Lambda function
+
+  # POST method for the /tasks resource in API Gateway
+  ApiGatewayMethodPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # No authorization required
+      HttpMethod: POST # Use the POST HTTP method
+      ResourceId: !Ref ApiGatewayResource # Attach to the /tasks resource
+      RestApiId: !Ref BackendFunctionApi # Reference the API Gateway
+      Integration:
+        Type: AWS_PROXY # Use Lambda proxy integration
+        IntegrationHttpMethod: POST # Use POST to invoke the Lambda function
+        Uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TasksPostFunction.Arn}/invocations # Invoke the Lambda function
+
+  # IAM Role for the Lambda functions to interact with DynamoDB
   BackendFunctionExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -86,12 +114,12 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
+              Service: lambda.amazonaws.com # Lambda service principal
+            Action: sts:AssumeRole # Allow Lambda to assume this role
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole # Basic execution role for Lambda
       Policies:
-        - PolicyName: DynamoDBAccess
+        - PolicyName: DynamoDBAccess # Custom policy for DynamoDB access
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -103,66 +131,58 @@ Resources:
                   - dynamodb:DeleteItem
                   - dynamodb:Scan
                   - dynamodb:Query
-                Resource:
-                  - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks
+                Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks # Allow actions on the specific DynamoDB table
 
-  # DynamoDB table for storing data
+  # DynamoDB table for storing tasks
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: serverless-tasks
+      TableName: serverless-tasks # Name of the DynamoDB table
       AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
+        - AttributeName: id # Define the primary key attribute
+          AttributeType: S # String type
       KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+        - AttributeName: id # Define the primary key
+          KeyType: HASH # Partition key
+      BillingMode: PAY_PER_REQUEST # Use on-demand billing for DynamoDB
+    DeletionPolicy: Retain # Prevent the table from being deleted when the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the table even if the resource is replaced
 
-  # Lambda function for handling API requests
+  # Lambda function for handling GET requests
   TasksGetFunction:
-    Type: AWS::Serverless::Function
+    Type: AWS::Lambda::Function
     Properties:
-      Handler: index.handler
-      Runtime: nodejs20.x
-      CodeUri: ./backend/invoke/tasks-get
-      Role: !GetAtt BackendFunctionExecutionRole.Arn
+      Handler: index.handler # Entry point for the Lambda function
+      Runtime: nodejs20.x # Node.js 20.x runtime
+      Code:
+        S3Bucket: !Ref BackendS3Bucket # Code location in the backend S3 bucket
+        S3Key: path/to/tasks-get.zip # Path to the Lambda function code in S3
+      Role: !GetAtt BackendFunctionExecutionRole.Arn # Role attached to the Lambda function
       Environment:
         Variables:
-          TABLE_NAME: !Ref DynamoDBTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            RestApiId: !Ref BackendFunctionApi
-            Path: /tasks/{id}
-            Method: GET
+          TABLE_NAME: !Ref DynamoDBTable # Set the DynamoDB table name as an environment variable
 
   # Lambda function for handling POST requests
   TasksPostFunction:
-    Type: AWS::Serverless::Function
+    Type: AWS::Lambda::Function
     Properties:
-      Handler: index.handler
-      Runtime: nodejs20.x
-      CodeUri: ./backend/invoke/tasks-post
-      Role: !GetAtt BackendFunctionExecutionRole.Arn
+      Handler: index.handler # Entry point for the Lambda function
+      Runtime: nodejs20.x # Node.js 20.x runtime
+      Code:
+        S3Bucket: !Ref BackendS3Bucket # Code location in the backend S3 bucket
+        S3Key: path/to/tasks-post.zip # Path to the Lambda function code in S3
+      Role: !GetAtt BackendFunctionExecutionRole.Arn # Role attached to the Lambda function
       Environment:
         Variables:
-          TABLE_NAME: !Ref DynamoDBTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            RestApiId: !Ref BackendFunctionApi
-            Path: /tasks
-            Method: POST
+          TABLE_NAME: !Ref DynamoDBTable # Set the DynamoDB table name as an environment variable
 
 Outputs:
+  # Output the URL for the static website
   WebsiteURL:
     Value: !Sub http://${FrontEndBucket}.s3-website-${AWS::Region}.amazonaws.com/
     Description: URL for the static website
+
+  # Output the API Gateway endpoint URL
   ApiEndpoint:
     Value: !Sub https://${BackendFunctionApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
     Description: API Gateway endpoint URL
