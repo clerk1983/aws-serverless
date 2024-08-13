@@ -43,7 +43,7 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs20.x
-      CodeUri: ./backend/src/tasks-get
+      CodeUri: ./backend/invoke/tasks-get
       Role: !GetAtt BackendFunctionExecutionRole.Arn
       Environment:
         Variables:
@@ -62,7 +62,7 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs20.x
-      CodeUri: ./backend/src/tasks-post
+      CodeUri: ./backend/invoke/tasks-post
       Role: !GetAtt BackendFunctionExecutionRole.Arn
       Environment:
         Variables:
