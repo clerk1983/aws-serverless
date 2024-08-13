@@ -1,4 +1,8 @@
-const { DynamoDBClient, GetItemCommand } = require('@aws-sdk/client-dynamodb')
+const {
+  DynamoDBClient,
+  GetItemCommand,
+  PutItemCommand,
+} = require('@aws-sdk/client-dynamodb')
 
 const dynamoDb = new DynamoDBClient({})
 
@@ -63,6 +67,7 @@ exports.handler = async event => {
     } catch (error) {
       console.error(error)
       response = {
+        headers,
         statusCode: 500,
         body: JSON.stringify({
           message: 'Could not create/update item',
@@ -74,6 +79,7 @@ exports.handler = async event => {
     // その他のHTTPメソッドの場合の処理
     response = {
       statusCode: 405,
+      headers,
       body: JSON.stringify({ message: 'Method Not Allowed' }),
     }
   }
