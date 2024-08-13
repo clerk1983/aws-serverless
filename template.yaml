@@ -41,7 +41,7 @@ Resources:
   BackendFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: app.handler
+      Handler: tasks.handler
       Runtime: nodejs20.x
       CodeUri: ./backend/src/
       Role: !GetAtt BackendFunctionExecutionRole.Arn
@@ -75,6 +75,8 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
         - PolicyName: DynamoDBAccess
           PolicyDocument:
