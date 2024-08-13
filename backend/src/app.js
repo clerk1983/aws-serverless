@@ -1,23 +1,20 @@
-const AWS = require('aws-sdk')
-const dynamoDb = new AWS.DynamoDB.DocumentClient()
+const { DynamoDBClient, GetItemCommand } = require('@aws-sdk/client-dynamodb')
+
+const dynamoDb = new DynamoDBClient({})
 
 exports.handler = async event => {
-  // リクエストから `id` パラメータを取得
+  console.info(event.pathParameters)
   const id = event.pathParameters.id
-
-  // DynamoDB からデータを取得するためのパラメータを設定
   const params = {
-    TableName: process.env.TABLE_NAME, // 環境変数からテーブル名を取得
+    TableName: process.env.TABLE_NAME,
     Key: {
-      id: id,
+      id: { S: id },
     },
   }
 
   try {
-    // DynamoDB からデータを取得
-    const data = await dynamoDb.get(params).promise()
+    const data = await dynamoDb.send(new GetItemCommand(params))
 
-    // データが存在しない場合の処理
     if (!data.Item) {
       return {
         statusCode: 404,
@@ -25,13 +22,11 @@ exports.handler = async event => {
       }
     }
 
-    // 成功レスポンスを返す
     return {
       statusCode: 200,
       body: JSON.stringify(data.Item),
     }
   } catch (error) {
-    // エラーレスポンスを返す
     console.error(error)
     return {
       statusCode: 500,

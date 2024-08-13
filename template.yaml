@@ -51,8 +51,30 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /{proxy+}
+            Path: /{id}
             Method: ANY
+
+  BackendFunctionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks/"
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks/*"
 
   # DynamoDB table for storing data
   DynamoDBTable:
@@ -74,5 +96,5 @@ Outputs:
     Value: !Sub "http://${FrontEndBucket}.s3-website-${AWS::Region}.amazonaws.com/"
     Description: URL for the static website
   ApiEndpoint:
-    Value: !Sub "https://${BackendFunction}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
     Description: API Gateway endpoint URL
