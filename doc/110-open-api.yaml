@@ -1,0 +1,37 @@
+openapi: 3.0.1
+servers:
+  - url: https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/Prod/
+info:
+  title: Serverless API
+  version: 1.0.0
+paths:
+  /tasks/{id}:
+    get:
+      summary: Get a task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the task to retrieve
+      responses:
+        "200":
+          description: A single task
+        "404":
+          description: Task not found
+  /tasks:
+    post:
+      summary: Create a new task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: string
+                  description: The task to create
+      responses:
+        "201":
+          description: Task created

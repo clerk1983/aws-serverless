@@ -1,6 +1,6 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
+Description: |
   SAM Template for a web application with S3, API Gateway, Lambda, and DynamoDB.
 
 Resources:
@@ -8,7 +8,7 @@ Resources:
   FrontEndBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-frontend-s3-${AWS::Region}-${AWS::AccountId}"
+      BucketName: !Sub ${AWS::StackName}-frontend-s3-${AWS::Region}-${AWS::AccountId}
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
@@ -29,13 +29,97 @@ Resources:
     Properties:
       Bucket: !Ref FrontEndBucket
       PolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Sid: PublicReadGetObject
             Effect: Allow
-            Principal: "*"
-            Action: "s3:GetObject"
-            Resource: !Sub "arn:aws:s3:::${FrontEndBucket}/*"
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${FrontEndBucket}/*
+
+  # S3 Bucket for hosting the OpenAPI file (private)
+  BackendS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-backend-s3-${AWS::Region}-${AWS::AccountId}
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+
+  # S3 Bucket Policy to restrict public access
+  BackendS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackendS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyPublicAccess
+            Effect: Deny
+            Principal: '*'
+            Action:
+              - s3:GetObject
+            Resource: !Sub arn:aws:s3:::${BackendS3Bucket}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  # ApiGateway
+  BackendFunctionApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      # DefinitionBody:
+      #   Fn::Transform:
+      #     Name: AWS::Include
+      #     Parameters:
+      #       Location: ./doc/110-open-api.yaml
+      Cors:
+        AllowMethods: '''GET,POST,PUT,DELETE,OPTIONS'''
+        AllowHeaders: '''Content-Type'''
+        AllowOrigin: '''*'''
+
+  BackendFunctionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                Resource:
+                  - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks
+
+  # DynamoDB table for storing data
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: serverless-tasks
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
 
   # Lambda function for handling API requests
   TasksGetFunction:
@@ -75,62 +159,10 @@ Resources:
             Path: /tasks
             Method: POST
 
-  BackendFunctionApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: Prod
-      Cors:
-        AllowMethods: "'GET,POST,OPTIONS'"
-        AllowHeaders: "'Content-Type'"
-        AllowOrigin: "'*'"
-
-  BackendFunctionExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Policies:
-        - PolicyName: DynamoDBAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:GetItem
-                  - dynamodb:PutItem
-                  - dynamodb:UpdateItem
-                  - dynamodb:DeleteItem
-                  - dynamodb:Scan
-                  - dynamodb:Query
-                Resource:
-                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks"
-
-  # DynamoDB table for storing data
-  DynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: serverless-tasks
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-
 Outputs:
   WebsiteURL:
-    Value: !Sub "http://${FrontEndBucket}.s3-website-${AWS::Region}.amazonaws.com/"
+    Value: !Sub http://${FrontEndBucket}.s3-website-${AWS::Region}.amazonaws.com/
     Description: URL for the static website
   ApiEndpoint:
-    Value: !Sub "https://${BackendFunctionApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Value: !Sub https://${BackendFunctionApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
     Description: API Gateway endpoint URL

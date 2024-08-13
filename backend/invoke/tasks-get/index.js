@@ -18,7 +18,7 @@ exports.handler = async event => {
       return {
         statusCode: 404,
         headers: {
-          'Access-Control-Allow-Origin': '*', // CORSを許可
+          'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({ message: 'Item not found' }),
       }
@@ -27,7 +27,7 @@ exports.handler = async event => {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*', // CORSを許可
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify(data.Item),
     }
