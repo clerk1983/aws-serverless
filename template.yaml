@@ -73,13 +73,6 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBTable # Environment variable pointing to the DynamoDB table
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            RestApiId: !Ref BackendFunctionApi # API Gateway ID to which this Lambda function is integrated
-            Path: /tasks/{id} # Path for the GET request
-            Method: GET # HTTP method
 
   # Lambda function for handling POST requests to the API
   TasksPostFunction:
@@ -92,19 +85,12 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDBTable # Environment variable pointing to the DynamoDB table
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            RestApiId: !Ref BackendFunctionApi # API Gateway ID to which this Lambda function is integrated
-            Path: /tasks # Path for the POST request
-            Method: POST # HTTP method
 
   # API Gateway definition for the Lambda functions
   BackendFunctionApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Prod # Deployment stage name
+      StageName: Prod
       DefinitionUri:
         Bucket: !Ref BackendS3Bucket # S3 bucket containing the OpenAPI definition
         Key: "doc/110-open-api.yaml" # Path to the OpenAPI YAML file in the S3 bucket

@@ -3,32 +3,42 @@ info:
   title: "aws-serverless"
   version: "1.0"
 servers:
-- url: "https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/{basePath}"
-  variables:
-    basePath:
-      default: "Prod"
+  - url: "https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/{basePath}"
+    variables:
+      basePath:
+        default: "Prod"
 paths:
   /tasks/{id}:
     get:
+      responses:
+        "200":
+          description: "Default response for GET /tasks/{id}"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      summary: "Get task by ID"
+      description: "Returns a task by ID"
+      operationId: "getById"
       parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
       x-amazon-apigateway-integration:
-        httpMethod: "POST"
+        httpMethod: "GET"
         uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
     options:
       summary: "CORS support"
       parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
       responses:
         "200":
           description: "Default response for CORS method"
@@ -48,8 +58,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
               application/json: "{}\n"
@@ -59,6 +69,13 @@ paths:
         type: "mock"
   /tasks:
     post:
+      responses:
+        "201":
+          description: "Default response for POST /tasks"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksPostFunction-R4zT1DCm82cN/invocations"
@@ -85,8 +102,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
               application/json: "{}\n"
@@ -94,34 +111,9 @@ paths:
           application/json: "{\n  \"statusCode\" : 200\n}\n"
         passthroughBehavior: "when_no_match"
         type: "mock"
-components: {}
-x-amazon-apigateway-documentation:
-  version: "20240814-01"
-  createdDate: "2024-08-14T08:49:40Z"
-  documentationParts:
-  - location:
-      type: "METHOD"
-      path: "/tasks/{id}"
-      method: "OPTIONS"
-    properties:
-      summary: "CORS support"
-  - location:
-      type: "METHOD"
-      path: "/tasks"
-      method: "OPTIONS"
-    properties:
-      summary: "CORS support"
-  - location:
-      type: "RESPONSE"
-      path: "/tasks/{id}"
-      method: "OPTIONS"
-      statusCode: "200"
-    properties:
-      description: "Default response for CORS method"
-  - location:
-      type: "RESPONSE"
-      path: "/tasks"
-      method: "OPTIONS"
-      statusCode: "200"
-    properties:
-      description: "Default response for CORS method"
+
+components:
+  schemas:
+    Empty:
+      title: "Empty Schema"
+      type: "object"
