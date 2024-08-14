@@ -8,35 +8,36 @@ Resources:
   FrontEndBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-frontend-s3-${AWS::Region}-${AWS::AccountId}"
+      BucketName: !Sub "${AWS::StackName}-frontend-s3-${AWS::Region}-${AWS::AccountId}" # Name of the S3 bucket for static website
       WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: error.html
+        IndexDocument: index.html # The default index document for the website
+        ErrorDocument: error.html # The default error document for the website
       OwnershipControls:
         Rules:
-          - ObjectOwnership: BucketOwnerPreferred
+          - ObjectOwnership: BucketOwnerPreferred # Set the bucket ownership to bucket owner preferred
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        IgnorePublicAcls: false
-        BlockPublicPolicy: false
-        RestrictPublicBuckets: false
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+        BlockPublicAcls: false # Do not block public ACLs
+        IgnorePublicAcls: false # Do not ignore public ACLs
+        BlockPublicPolicy: false # Do not block public bucket policies
+        RestrictPublicBuckets: false # Do not restrict public buckets
+    DeletionPolicy: Retain # Retain the bucket even if the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the bucket even if the resource is replaced
 
   # BucketPolicy for the S3 bucket to allow public access
   FrontEndBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref FrontEndBucket
+      Bucket: !Ref FrontEndBucket # Reference to the FrontEndBucket
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Sid: PublicReadGetObject
+          - Sid: PublicReadGetObject # Policy to allow public read access to objects
             Effect: Allow
-            Principal: "*"
-            Action: "s3:GetObject"
-            Resource: !Sub "arn:aws:s3:::${FrontEndBucket}/*"
+            Principal: "*" # Allow access to everyone
+            Action: "s3:GetObject" # Allow GET object actions
+            Resource: !Sub "arn:aws:s3:::${FrontEndBucket}/*" # Apply to all objects in the bucket
 
+  # S3 Bucket for backend resources (e.g., OpenAPI YAML file)
   BackendS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -52,7 +53,7 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Sid: DenyPublicAccess
+          - Sid: DenyPublicAccess # Deny public access to the backend bucket
             Effect: Deny
             Principal: "*" # Apply to everyone
             Action: s3:GetObject # Deny read access
@@ -61,52 +62,54 @@ Resources:
               Bool:
                 aws:SecureTransport: "false" # Allow only secure (HTTPS) access
 
-  # Lambda function for handling API requests
+  # Lambda function for handling GET requests to the API
   TasksGetFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index.handler
-      Runtime: nodejs20.x
-      CodeUri: ./backend/invoke/tasks-get
-      Role: !GetAtt BackendFunctionExecutionRole.Arn
+      Handler: index.handler # The handler for the Lambda function
+      Runtime: nodejs20.x # Runtime environment for the Lambda function
+      CodeUri: ./backend/invoke/tasks-get # Path to the function code
+      Role: !GetAtt BackendFunctionExecutionRole.Arn # IAM role for the Lambda function
       Environment:
         Variables:
-          TABLE_NAME: !Ref DynamoDBTable
+          TABLE_NAME: !Ref DynamoDBTable # Environment variable pointing to the DynamoDB table
       Events:
         Api:
           Type: Api
           Properties:
-            RestApiId: !Ref BackendFunctionApi
-            Path: /tasks/{id}
-            Method: GET
+            RestApiId: !Ref BackendFunctionApi # API Gateway ID to which this Lambda function is integrated
+            Path: /tasks/{id} # Path for the GET request
+            Method: GET # HTTP method
 
-  # Lambda function for handling POST requests
+  # Lambda function for handling POST requests to the API
   TasksPostFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: index.handler
-      Runtime: nodejs20.x
-      CodeUri: ./backend/invoke/tasks-post
-      Role: !GetAtt BackendFunctionExecutionRole.Arn
+      Handler: index.handler # The handler for the Lambda function
+      Runtime: nodejs20.x # Runtime environment for the Lambda function
+      CodeUri: ./backend/invoke/tasks-post # Path to the function code
+      Role: !GetAtt BackendFunctionExecutionRole.Arn # IAM role for the Lambda function
       Environment:
         Variables:
-          TABLE_NAME: !Ref DynamoDBTable
+          TABLE_NAME: !Ref DynamoDBTable # Environment variable pointing to the DynamoDB table
       Events:
         Api:
           Type: Api
           Properties:
-            RestApiId: !Ref BackendFunctionApi
-            Path: /tasks
-            Method: POST
+            RestApiId: !Ref BackendFunctionApi # API Gateway ID to which this Lambda function is integrated
+            Path: /tasks # Path for the POST request
+            Method: POST # HTTP method
 
+  # API Gateway definition for the Lambda functions
   BackendFunctionApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Prod
+      StageName: Prod # Deployment stage name
       DefinitionUri:
-        Bucket: !Ref BackendS3Bucket
-        Key: "doc/110-open-api.yaml"
+        Bucket: !Ref BackendS3Bucket # S3 bucket containing the OpenAPI definition
+        Key: "doc/110-open-api.yaml" # Path to the OpenAPI YAML file in the S3 bucket
 
+  # IAM role for Lambda functions with necessary permissions for DynamoDB access
   BackendFunctionExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -115,45 +118,48 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
+              Service: lambda.amazonaws.com # Allow the Lambda service to assume this role
+            Action: sts:AssumeRole # Action for assuming the role
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole # Managed policy for basic Lambda execution
       Policies:
-        - PolicyName: DynamoDBAccess
+        - PolicyName: DynamoDBAccess # Custom policy for DynamoDB access
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:GetItem
-                  - dynamodb:PutItem
-                  - dynamodb:UpdateItem
-                  - dynamodb:DeleteItem
-                  - dynamodb:Scan
-                  - dynamodb:Query
+                  - dynamodb:GetItem # Allow getting items from DynamoDB
+                  - dynamodb:PutItem # Allow putting items into DynamoDB
+                  - dynamodb:UpdateItem # Allow updating items in DynamoDB
+                  - dynamodb:DeleteItem # Allow deleting items from DynamoDB
+                  - dynamodb:Scan # Allow scanning DynamoDB tables
+                  - dynamodb:Query # Allow querying DynamoDB tables
                 Resource:
-                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks"
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks" # Target the specific DynamoDB table
 
-  # DynamoDB table for storing data
+  # DynamoDB table for storing application data
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: serverless-tasks
+      TableName: serverless-tasks # Name of the DynamoDB table
       AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
+        - AttributeName: id # Primary key attribute
+          AttributeType: S # Attribute type (String)
       KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+        - AttributeName: id # Primary key schema
+          KeyType: HASH # Key type (Hash key)
+      BillingMode: PAY_PER_REQUEST # Use on-demand billing mode
+    DeletionPolicy: Retain # Retain the table even if the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the table even if the resource is replaced
 
 Outputs:
+  # Output the URL of the static website hosted in S3
   WebsiteURL:
     Value: !Sub "http://${FrontEndBucket}.s3-website-${AWS::Region}.amazonaws.com/"
     Description: URL for the static website
+
+  # Output the endpoint URL for the API Gateway
   ApiEndpoint:
     Value: !Sub "https://${BackendFunctionApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
     Description: API Gateway endpoint URL
