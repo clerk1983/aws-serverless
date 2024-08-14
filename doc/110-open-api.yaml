@@ -1,37 +1,127 @@
-openapi: 3.0.1
-servers:
-  - url: https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/Prod/
+openapi: "3.0.1"
 info:
-  title: Serverless API
-  version: 1.0.0
+  title: "aws-serverless"
+  version: "1.0"
+servers:
+- url: "https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/{basePath}"
+  variables:
+    basePath:
+      default: "Prod"
 paths:
   /tasks/{id}:
     get:
-      summary: Get a task by ID
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The ID of the task to retrieve
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+    options:
+      summary: "CORS support"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       responses:
         "200":
-          description: A single task
-        "404":
-          description: Task not found
+          description: "Default response for CORS method"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content: {}
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "{}\n"
+        requestTemplates:
+          application/json: "{\n  \"statusCode\" : 200\n}\n"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
   /tasks:
     post:
-      summary: Create a new task
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  type: string
-                  description: The task to create
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksPostFunction-R4zT1DCm82cN/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+    options:
+      summary: "CORS support"
       responses:
-        "201":
-          description: Task created
+        "200":
+          description: "Default response for CORS method"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content: {}
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: "{}\n"
+        requestTemplates:
+          application/json: "{\n  \"statusCode\" : 200\n}\n"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+components: {}
+x-amazon-apigateway-documentation:
+  version: "20240814-01"
+  createdDate: "2024-08-14T08:49:40Z"
+  documentationParts:
+  - location:
+      type: "METHOD"
+      path: "/tasks/{id}"
+      method: "OPTIONS"
+    properties:
+      summary: "CORS support"
+  - location:
+      type: "METHOD"
+      path: "/tasks"
+      method: "OPTIONS"
+    properties:
+      summary: "CORS support"
+  - location:
+      type: "RESPONSE"
+      path: "/tasks/{id}"
+      method: "OPTIONS"
+      statusCode: "200"
+    properties:
+      description: "Default response for CORS method"
+  - location:
+      type: "RESPONSE"
+      path: "/tasks"
+      method: "OPTIONS"
+      statusCode: "200"
+    properties:
+      description: "Default response for CORS method"

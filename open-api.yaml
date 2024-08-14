@@ -17,6 +17,7 @@ paths:
         schema:
           type: "string"
     options:
+      summary: "CORS support"
       parameters:
       - name: "id"
         in: "path"
@@ -25,7 +26,7 @@ paths:
           type: "string"
       responses:
         "200":
-          description: "200 response"
+          description: "Default response for CORS method"
           headers:
             Access-Control-Allow-Origin:
               schema:
@@ -40,9 +41,10 @@ paths:
   /tasks:
     post: {}
     options:
+      summary: "CORS support"
       responses:
         "200":
-          description: "200 response"
+          description: "Default response for CORS method"
           headers:
             Access-Control-Allow-Origin:
               schema:

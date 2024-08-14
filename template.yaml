@@ -37,6 +37,30 @@ Resources:
             Action: "s3:GetObject"
             Resource: !Sub "arn:aws:s3:::${FrontEndBucket}/*"
 
+  BackendS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-backend-s3-${AWS::Region}-${AWS::AccountId} # Unique bucket name for backend resources
+    DeletionPolicy: Retain # Prevent the bucket from being deleted when the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the bucket even if the resource is replaced
+
+  # Bucket policy to deny public access to the backend S3 bucket
+  BackendS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackendS3Bucket # Reference to the backend S3 bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyPublicAccess
+            Effect: Deny
+            Principal: "*" # Apply to everyone
+            Action: s3:GetObject # Deny read access
+            Resource: !Sub arn:${AWS::Partition}:s3:::${BackendS3Bucket}/* # Target all objects in the bucket
+            Condition:
+              Bool:
+                aws:SecureTransport: "false" # Allow only secure (HTTPS) access
+
   # Lambda function for handling API requests
   TasksGetFunction:
     Type: AWS::Serverless::Function
@@ -79,10 +103,9 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
-      Cors:
-        AllowMethods: "'GET,POST,OPTIONS'"
-        AllowHeaders: "'Content-Type'"
-        AllowOrigin: "'*'"
+      DefinitionUri:
+        Bucket: !Ref BackendS3Bucket
+        Key: "doc/110-open-api.yaml"
 
   BackendFunctionExecutionRole:
     Type: AWS::IAM::Role
