@@ -95,6 +95,22 @@ Resources:
         Bucket: !Ref BackendS3Bucket # S3 bucket containing the OpenAPI definition
         Key: "doc/110-open-api.yaml" # Path to the OpenAPI YAML file in the S3 bucket
 
+  TasksGetFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt TasksGetFunction.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BackendFunctionApi}/*/GET/tasks/*"
+
+  TasksPostFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt TasksPostFunction.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${BackendFunctionApi}/*/POST/tasks"
+
   # IAM role for Lambda functions with necessary permissions for DynamoDB access
   BackendFunctionExecutionRole:
     Type: AWS::IAM::Role
