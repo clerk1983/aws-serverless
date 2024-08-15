@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 const dynamoDb = new DynamoDBClient({})
 
 export const handler = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   const body = JSON.parse(event.body || '{}')
   const id = uuidv4()

@@ -9,7 +9,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 const dynamoDb = new DynamoDBClient({})
 
 export const handler = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   const id = event.pathParameters?.id
 
@@ -32,7 +32,7 @@ export const handler = async (
 
   try {
     const data: GetItemCommandOutput = await dynamoDb.send(
-      new GetItemCommand(params)
+      new GetItemCommand(params),
     )
 
     if (!data.Item) {
