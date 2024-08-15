@@ -6,9 +6,6 @@
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production"
   },
-  "dependencies": {
-    "uuid": "^10.0.0"
-  },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.631.0",
     "@babel/cli": "^7.24.8",
