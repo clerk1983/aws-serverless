@@ -1,13 +1,16 @@
-const { DynamoDBClient, PutItemCommand } = require('@aws-sdk/client-dynamodb')
-const { v4: uuidv4 } = require('uuid')
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { v4 as uuidv4 } from 'uuid'
 
 const dynamoDb = new DynamoDBClient({})
 
-exports.handler = async event => {
-  const body = JSON.parse(event.body)
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
+  const body = JSON.parse(event.body || '{}')
   const id = uuidv4()
   const params = {
-    TableName: process.env.TABLE_NAME,
+    TableName: process.env.TABLE_NAME as string,
     Item: {
       id: { S: id },
       data: { S: body.data },
@@ -24,7 +27,7 @@ exports.handler = async event => {
       },
       body: JSON.stringify({ id: id, message: 'Item created successfully' }),
     }
-  } catch (error) {
+  } catch (error: any) {
     return {
       statusCode: 500,
       headers: {
