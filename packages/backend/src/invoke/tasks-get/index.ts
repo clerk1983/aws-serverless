@@ -24,7 +24,7 @@ export const handler = async (
   }
 
   const params: GetItemCommandInput = {
-    TableName: process.env.TABLE_NAME!,
+    TableName: process.env.TABLE_NAME,
     Key: {
       id: { S: id },
     },

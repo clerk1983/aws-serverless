@@ -1,96 +1,165 @@
-openapi: "3.0.1"
+openapi: 3.0.1
 info:
-  title: "aws-serverless"
+  title: reverse-aws-serverless
   version: "1.0"
-  description: "An example of a serverless application"
+  description: An example of a serverless application
 servers:
-  - url: "https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/{basePath}"
+  - url: https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/{basePath}
     variables:
       basePath:
-        default: "Prod"
+        default: Prod
 paths:
-  /tasks/{id}:
+  /games:
     get:
-      tags:
-        - TASKS
+      summary: Retrieve game information
+      description: ゲーム情報を取得する
       responses:
-        "200":
-          description: "Default response for GET /tasks/{id}"
+        200:
+          description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
-      summary: "Get task by ID"
-      description: "Returns a task by ID"
-      operationId: "getById"
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
-
-  /tasks:
+                type: object
+                properties:
+                  games:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        winnerDist:
+                          type: integer
+                          example: 1
+                        startedAt:
+                          type: string
+                          format: date-time
+                          example: 2020-01-01T00:00:00Z
     post:
-      tags:
-        - TASKS
-      summary: "Create a new task"
-      description: "Creates a new task with a unique ID and associated text."
-      operationId: "createTask"
+      summary: Create new game
+      description: 新規ゲーム開始
+      responses:
+        201:
+          description: Created
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations
+        passthroughBehavior: when_no_match
+        type: aws_proxy
+
+  /games/latest/turns/{turnCount}:
+    parameters:
+      - name: turnCount
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+    get:
+      summary: Get turn by turnCount
+      description: 特定のターンの盤情報を取得する
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  turnCount:
+                    type: integer
+                    format: int32
+                    example: 1
+                  board:
+                    type: array
+                    example:
+                      [
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0],
+                      ]
+                  nextDisc:
+                    type: integer
+                    format: int32
+                    example: 1
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations
+        passthroughBehavior: when_no_match
+        type: aws_proxy
+
+  /games/latest/turns:
+    post:
+      summary: Post my move
+      description: 石を置く
       requestBody:
-        description: "Task creation request"
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TaskRequest"
+              type: object
+              properties:
+                turnCount:
+                  type: integer
+                  format: int32
+                  example: 1
+                move:
+                  type: object
+                  properties:
+                    disc:
+                      type: integer
+                      format: int32
+                      example: 1
+                    x:
+                      type: integer
+                      format: int32
+                      example: 1
+                    y:
+                      type: integer
+                      format: int32
+                      example: 1
+      x-amazon-apigateway-integration:
+        uri: arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksPostFunction-R4zT1DCm82cN/invocations
+        passthroughBehavior: when_no_match
+        type: aws_proxy
       responses:
         "201":
-          description: "Task successfully created"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TaskResponse"
+          description: Created
         "400":
-          description: "Invalid request"
-
-      x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksPostFunction-R4zT1DCm82cN/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
+          description: Invalid request
 
 components:
   schemas:
     Empty: {}
 
     TaskRequest:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "string"
-          format: "uuid"
-          description: "Unique identifier for the task"
+          type: string
+          format: uuid
+          description: Unique identifier for the task
         text:
-          type: "string"
-          description: "The text content of the task"
+          type: string
+          description: The text content of the task
       required:
         - id
         - text
     TaskResponse:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "string"
-          format: "uuid"
-          description: "Unique identifier for the created task"
+          type: string
+          format: uuid
+          description: Unique identifier for the created task
         text:
-          type: "string"
-          description: "The text content of the created task"
+          type: string
+          description: The text content of the created task
         createdAt:
-          type: "string"
-          format: "date-time"
-          description: "Timestamp when the task was created"
+          type: string
+          format: date-time
+          description: Timestamp when the task was created
