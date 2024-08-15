@@ -1,25 +1,21 @@
-import tseslint from '@typescript-eslint/eslint-plugin' // Import TypeScript specific ESLint plugin
-import tsParser from '@typescript-eslint/parser' // Import TypeScript parser for ESLint
-import globals from 'globals' // Import global variables (like window, document, etc.)
+import tseslint from '@typescript-eslint/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
 
 export default [
   {
-    // ESLint will ignore files in the 'dist' and 'node_modules' directories
-    ignores: ['dist', 'node_modules'],
+    ignores: ['dist'], // 'dist' ディレクトリを無視する設定
   },
   {
-    // Apply the following settings to all TypeScript files
-    files: ['**/*.{ts}'],
+    files: ['**/*.ts'], // TypeScriptファイルのみに対してLintを実行
     languageOptions: {
-      globals: globals.browser, // Specify browser global variables (like window, document, etc.)
-      parser: tsParser, // Use TypeScript parser to parse TypeScript code
+      parser: tsParser,
     },
     plugins: {
-      '@typescript-eslint': tseslint, // Register TypeScript-specific ESLint plugin
+      '@typescript-eslint': tseslint, // TypeScript用のプラグイン
     },
     rules: {
-      // Extend recommended ESLint rules for TypeScript
-      ...tseslint.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules, // TypeScript ESLintの推奨ルール
+      '@typescript-eslint/ban-ts-comment': 'warn', // ts-commentの使用を警告
     },
   },
 ]

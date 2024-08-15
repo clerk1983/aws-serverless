@@ -17,9 +17,8 @@ export const handler = async (
     },
   }
   try {
-    let aaa = ''
     await dynamoDb.send(new PutItemCommand(params))
-
+    let aaa
     return {
       statusCode: 201,
       headers: {
@@ -27,7 +26,7 @@ export const handler = async (
       },
       body: JSON.stringify({ id: id, message: 'Item created successfully' }),
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       statusCode: 500,
       headers: {
