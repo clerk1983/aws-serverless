@@ -76,7 +76,7 @@ Resources:
     Properties:
       Handler: index.handler # The handler for the Lambda function
       Runtime: nodejs20.x # Runtime environment for the Lambda function
-      CodeUri: ./dist/backend/invoke/tasks-get # Path to the function code
+      CodeUri: ./packages/backend/dist/invoke/tasks-get # Path to the function code
       Role: !GetAtt BackendFunctionExecutionRole.Arn # IAM role for the Lambda function
       Environment:
         Variables:
@@ -96,7 +96,7 @@ Resources:
     Properties:
       Handler: index.handler # The handler for the Lambda function
       Runtime: nodejs20.x # Runtime environment for the Lambda function
-      CodeUri: ./dist/backend/invoke/tasks-post # Path to the function code
+      CodeUri: ./package/backend/dist/invoke/tasks-post # Path to the function code
       Role: !GetAtt BackendFunctionExecutionRole.Arn # IAM role for the Lambda function
       Environment:
         Variables:

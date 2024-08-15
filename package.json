@@ -1,17 +1,17 @@
 {
-  "name": "aws-serverless-backend",
+  "name": "aws-serverless",
   "version": "1.0.0",
   "description": "A simple AWS Lambda function to fetch data from DynamoDB",
   "private": true,
   "workspaces": [
-    "backend",
-    "frontend"
+    "packages/backend",
+    "packages/frontend"
   ],
   "scripts": {
     "prepare": "husky",
     "build": "webpack --config webpack.config.js --mode production",
     "lint": "eslint . --fix",
-    "format": "prettier --write backend/**/*.ts"
+    "format": "prettier --write **/*.ts"
   },
   "packageManager": "yarn@4.4.0",
   "dependencies": {
