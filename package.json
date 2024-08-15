@@ -13,6 +13,10 @@
     "lint": "eslint . --fix",
     "format": "prettier --write backend/**/*.ts"
   },
+  "packageManager": "yarn@4.4.0",
+  "dependencies": {
+    "dayjs": "^1.11.12"
+  },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
     "@babel/core": "^7.25.2",
@@ -31,6 +35,7 @@
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.1.0",
+    "webpack": "^5.93.0",
     "webpack-cli": "^5.1.4"
   },
   "lint-staged": {
@@ -38,9 +43,5 @@
       "npm run lint",
       "npm run format"
     ]
-  },
-  "packageManager": "yarn@4.4.0",
-  "dependencies": {
-    "dayjs": "^1.11.12"
   }
 }
