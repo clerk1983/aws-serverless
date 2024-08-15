@@ -2,6 +2,11 @@
   "name": "aws-serverless-backend",
   "version": "1.0.0",
   "description": "A simple AWS Lambda function to fetch data from DynamoDB",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "prepare": "husky",
     "build": "webpack --config webpack.config.js --mode production",
@@ -33,5 +38,9 @@
       "npm run lint",
       "npm run format"
     ]
+  },
+  "packageManager": "yarn@4.4.0",
+  "dependencies": {
+    "dayjs": "^1.11.12"
   }
 }
