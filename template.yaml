@@ -159,7 +159,7 @@ Outputs:
   # Output the URL of the static website hosted in S3
   WebsiteURL:
     Value: !Sub "http://${FrontEndBucket}.s3-website-${AWS::Region}.amazonaws.com/"
-    Description: URL for the static website
+    Description: URL for the static my website
 
   # Output the endpoint URL for the API Gateway
   ApiEndpoint:

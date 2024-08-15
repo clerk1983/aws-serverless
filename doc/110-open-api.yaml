@@ -30,7 +30,6 @@ paths:
           schema:
             type: "string"
       x-amazon-apigateway-integration:
-        httpMethod: "GET"
         uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
@@ -60,7 +59,6 @@ paths:
           description: "Invalid request"
 
       x-amazon-apigateway-integration:
-        httpMethod: "POST"
         uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksPostFunction-R4zT1DCm82cN/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
