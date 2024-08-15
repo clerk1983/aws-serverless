@@ -2,6 +2,7 @@ openapi: "3.0.1"
 info:
   title: "aws-serverless"
   version: "1.0"
+  description: "An example of a serverless application"
 servers:
   - url: "https://8bgmut0ajj.execute-api.ap-northeast-1.amazonaws.com/{basePath}"
     variables:
@@ -10,6 +11,8 @@ servers:
 paths:
   /tasks/{id}:
     get:
+      tags:
+        - TASKS
       responses:
         "200":
           description: "Default response for GET /tasks/{id}"
@@ -31,89 +34,65 @@ paths:
         uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
-    options:
-      summary: "CORS support"
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "200":
-          description: "Default response for CORS method"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content: {}
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-            responseTemplates:
-              application/json: "{}\n"
-        requestTemplates:
-          application/json: "{\n  \"statusCode\" : 200\n}\n"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
+
   /tasks:
     post:
+      tags:
+        - TASKS
+      summary: "Create a new task"
+      description: "Creates a new task with a unique ID and associated text."
+      operationId: "createTask"
+      requestBody:
+        description: "Task creation request"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskRequest"
       responses:
         "201":
-          description: "Default response for POST /tasks"
+          description: "Task successfully created"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Empty"
+                $ref: "#/components/schemas/TaskResponse"
+        "400":
+          description: "Invalid request"
+
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri: "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksPostFunction-R4zT1DCm82cN/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
-    options:
-      summary: "CORS support"
-      responses:
-        "200":
-          description: "Default response for CORS method"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content: {}
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-            responseTemplates:
-              application/json: "{}\n"
-        requestTemplates:
-          application/json: "{\n  \"statusCode\" : 200\n}\n"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
 
 components:
   schemas:
-    Empty:
-      title: "Empty Schema"
+    Empty: {}
+
+    TaskRequest:
       type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          description: "Unique identifier for the task"
+        text:
+          type: "string"
+          description: "The text content of the task"
+      required:
+        - id
+        - text
+    TaskResponse:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          description: "Unique identifier for the created task"
+        text:
+          type: "string"
+          description: "The text content of the created task"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          description: "Timestamp when the task was created"
