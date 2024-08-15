@@ -48,4 +48,4 @@ jobs:
         run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
 
       - name: Sync Frontend files to S3
-        run: aws s3 sync ./frontend/static/ s3://aws-serverless-frontend-s3-ap-northeast-1-465068362057 --delete
+        run: aws s3 sync ./packages/frontend/static/ s3://aws-serverless-frontend-s3-ap-northeast-1-465068362057 --delete
