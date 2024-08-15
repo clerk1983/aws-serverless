@@ -18,7 +18,6 @@ export const handler = async (
   }
   try {
     await dynamoDb.send(new PutItemCommand(params))
-    let aaa
     return {
       statusCode: 201,
       headers: {
