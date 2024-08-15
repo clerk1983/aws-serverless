@@ -16,8 +16,8 @@ export const handler = async (
       data: { S: body.data },
     },
   }
-
   try {
+    let aaa = ''
     await dynamoDb.send(new PutItemCommand(params))
 
     return {
