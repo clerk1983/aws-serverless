@@ -32,6 +32,12 @@ jobs:
       - name: Build project with webpack
         run: npm run build
 
+      - name: Setup SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: Build project with SAM
+        run: sam build
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
