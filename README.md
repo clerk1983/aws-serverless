@@ -15,10 +15,3 @@ sam deploy
 aws cloudformation delete-stack --stack-name aws-serverless
 aws cloudformation describe-stacks --stack-name aws-serverless
 ```
-
---
-todo:
-
-- eslint
-- babel
-- OpenAPI
