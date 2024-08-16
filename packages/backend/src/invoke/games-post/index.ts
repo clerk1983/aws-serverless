@@ -1,6 +1,8 @@
 import {
   AttributeValue,
+  DeleteItemCommand,
   DynamoDBClient,
+  PutItemCommand,
   TransactWriteItemsCommand,
 } from '@aws-sdk/client-dynamodb';
 import { APIGatewayProxyResult } from 'aws-lambda';
@@ -22,6 +24,8 @@ const INITIAL_BOARD: string[][] = [
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
 ];
+
+const KEY_LATEST_GAME_ID = 'LATEST_GAME_ID';
 
 /**
  * POST /tasks
@@ -79,10 +83,28 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
       },
     ],
   };
-  const dynamoDb = new DynamoDBClient();
+  const dynamoDb = new DynamoDBClient({ region: 'ap-northeast-1' });
   try {
     const result = await dynamoDb.send(new TransactWriteItemsCommand(params));
     console.info(`Transaction successful: ${result}`);
+
+    await dynamoDb.send(
+      new DeleteItemCommand({
+        TableName: process.env.TABLE_NAME_ATTRIBUTES,
+        Key: {
+          key: { S: KEY_LATEST_GAME_ID },
+        },
+      }),
+    );
+    await dynamoDb.send(
+      new PutItemCommand({
+        TableName: process.env.TABLE_NAME_ATTRIBUTES,
+        Item: {
+          key: { S: KEY_LATEST_GAME_ID },
+          value: { S: game_id },
+        },
+      }),
+    );
 
     return {
       statusCode: 201,

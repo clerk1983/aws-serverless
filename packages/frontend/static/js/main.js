@@ -1,5 +1,5 @@
 const API_END_POINT =
-  'https://etwimvgsbj.execute-api.ap-northeast-1.amazonaws.com/Prod/';
+  'https://35hjzl5ka7.execute-api.ap-northeast-1.amazonaws.com/Prod/';
 const EMPTY = 0;
 const DARK = 1;
 const LIGHT = 2;

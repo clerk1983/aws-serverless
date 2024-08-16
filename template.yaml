@@ -71,9 +71,7 @@ Resources:
                   - dynamodb:Scan # Allow scanning DynamoDB tables
                   - dynamodb:Query # Allow querying DynamoDB tables
                 Resource:
-                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/rvs-games" # Target the specific DynamoDB table
-                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/rvs-turns" # Target the specific DynamoDB table
-                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/rvs-square" # Target the specific DynamoDB table
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/rvs-*" # Target the specific DynamoDB table
 
   GamesPostFunction:
     Type: AWS::Serverless::Function
@@ -87,6 +85,7 @@ Resources:
           TABLE_NAME_GAMES: !Ref GamesTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_TURNS: !Ref TurnsTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_SQUARE: !Ref SquareTable # Environment variable pointing to the DynamoDB table
+          TABLE_NAME_ATTRIBUTES: !Ref AttributesTable # Environment variable pointing to the DynamoDB table
 
       Events:
         Api:
@@ -96,6 +95,28 @@ Resources:
             Path: /games
             Method: POST
 
+  GamesLatestTurnsGet:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler # The handler for the Lambda function
+      Runtime: nodejs20.x # Runtime environment for the Lambda function
+      CodeUri: ./packages/backend/dist/invoke/games-latest-turns-get # Path to the function code
+      Role: !GetAtt BackendFunctionExecutionRole.Arn # IAM role for the Lambda function
+      Environment:
+        Variables:
+          TABLE_NAME_GAMES: !Ref GamesTable # Environment variable pointing to the DynamoDB table
+          TABLE_NAME_TURNS: !Ref TurnsTable # Environment variable pointing to the DynamoDB table
+          TABLE_NAME_SQUARE: !Ref SquareTable # Environment variable pointing to the DynamoDB table
+          TABLE_NAME_ATTRIBUTES: !Ref AttributesTable # Environment variable pointing to the DynamoDB table
+
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref BackendFunctionApi
+            Path: /games/latest/turns/{turnCount}
+            Method: GET
+
   GamesTable:
     Type: "AWS::DynamoDB::Table"
     Properties:
@@ -103,8 +124,26 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "id"
           AttributeType: "S"
+        - AttributeName: "create_at"
+          AttributeType: "S"
       KeySchema:
         - AttributeName: "id"
+          KeyType: "HASH"
+        - AttributeName: "create_at"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+    DeletionPolicy: Delete # Retain the table even if the stack is deleted
+    UpdateReplacePolicy: Delete # Retain the table even if the resource is replaced
+
+  AttributesTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "rvs-attributes"
+      AttributeDefinitions:
+        - AttributeName: "key"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "key"
           KeyType: "HASH"
       BillingMode: "PAY_PER_REQUEST"
     DeletionPolicy: Delete # Retain the table even if the stack is deleted
