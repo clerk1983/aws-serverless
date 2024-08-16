@@ -139,6 +139,9 @@ Resources:
                   - dynamodb:Query # Allow querying DynamoDB tables
                 Resource:
                   - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/serverless-tasks" # Target the specific DynamoDB table
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/rvs-games" # Target the specific DynamoDB table
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/rvs-turns" # Target the specific DynamoDB table
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/rvs-square" # Target the specific DynamoDB table
 
   # DynamoDB table for storing application data
   DynamoDBTable:
@@ -152,6 +155,56 @@ Resources:
         - AttributeName: id # Primary key schema
           KeyType: HASH # Key type (Hash key)
       BillingMode: PAY_PER_REQUEST # Use on-demand billing mode
+    DeletionPolicy: Retain # Retain the table even if the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the table even if the resource is replaced
+
+  GamesTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "rvs-games"
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
+    DeletionPolicy: Retain # Retain the table even if the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the table even if the resource is replaced
+
+  TurnsTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "rvs-turns"
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "N"
+        - AttributeName: "game_id"
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+        - AttributeName: "game_id"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+    DeletionPolicy: Retain # Retain the table even if the stack is deleted
+    UpdateReplacePolicy: Retain # Retain the table even if the resource is replaced
+
+  MovesTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "rvs-square"
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "N"
+        - AttributeName: "turn_id"
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+        - AttributeName: "turn_id"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
     DeletionPolicy: Retain # Retain the table even if the stack is deleted
     UpdateReplacePolicy: Retain # Retain the table even if the resource is replaced
 
