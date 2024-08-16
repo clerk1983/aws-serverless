@@ -1,8 +1,8 @@
 const API_END_POINT =
-  'https://c2k8uzdluh.execute-api.ap-northeast-1.amazonaws.com/Prod/'
-const EMPTY = 0
-const DARK = 1
-const LIGHT = 2
+  'https://etwimvgsbj.execute-api.ap-northeast-1.amazonaws.com/Prod/';
+const EMPTY = 0;
+const DARK = 1;
+const LIGHT = 2;
 
 const INITIAL_BOARD = [
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
@@ -13,37 +13,37 @@ const INITIAL_BOARD = [
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-]
+];
 
-const boardElement = document.querySelector('#board')
+const boardElement = document.querySelector('#board');
 
 const showBoard = async (_board) => {
   while (boardElement.firstChild) {
-    boardElement.removeChild(boardElement.firstChild)
+    boardElement.removeChild(boardElement.firstChild);
   }
   _board.forEach((line) => {
     line.forEach((square) => {
-      const squareElement = document.createElement('div')
-      squareElement.className = 'square'
+      const squareElement = document.createElement('div');
+      squareElement.className = 'square';
       if (square !== EMPTY) {
-        const stoneElement = document.createElement('div')
-        const color = square === DARK ? 'dark' : 'light'
-        stoneElement.className = `stone ${color}`
-        squareElement.appendChild(stoneElement)
+        const stoneElement = document.createElement('div');
+        const color = square === DARK ? 'dark' : 'light';
+        stoneElement.className = `stone ${color}`;
+        squareElement.appendChild(stoneElement);
       }
-      boardElement.appendChild(squareElement)
-    })
-  })
-}
+      boardElement.appendChild(squareElement);
+    });
+  });
+};
 
 const registerGame = async () => {
-  const result = await fetch(API_END_POINT + 'games', { method: 'POST' })
-  console.info(result)
-}
+  const result = await fetch(API_END_POINT + 'games', { method: 'POST' });
+  console.info(result);
+};
 
 const main = async () => {
-  await registerGame()
-  await showBoard(INITIAL_BOARD)
-}
+  await registerGame();
+  await showBoard(INITIAL_BOARD);
+};
 
-main()
+main();

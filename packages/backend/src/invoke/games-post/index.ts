@@ -69,7 +69,7 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
       },
       {
         Put: {
-          TableName: process.env.TABLE_NAME_MOVES,
+          TableName: process.env.TABLE_NAME_SQUARE,
           Item: {
             id: { S: square_id },
             turn_id: { S: turn_id },
@@ -108,14 +108,6 @@ const genAttr = (): AttributeValue => {
   };
 };
 
-const squareList: AttributeValue[] = [];
-INITIAL_BOARD.forEach((line, y) => {
-  line.forEach((disc, x) => {
-    squareList.push(genSqr(x.toString(), y.toString(), disc));
-  });
-});
-console.info(JSON.stringify(squareList, null, 2));
-
 const genSqr = (x: string, y: string, disc: string): AttributeValue => {
   const attr = {
     M: {
@@ -126,3 +118,10 @@ const genSqr = (x: string, y: string, disc: string): AttributeValue => {
   };
   return attr;
 };
+
+const squareList: AttributeValue[] = [];
+INITIAL_BOARD.forEach((line, y) => {
+  line.forEach((disc, x) => {
+    squareList.push(genSqr(x.toString(), y.toString(), disc));
+  });
+});

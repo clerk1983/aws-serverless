@@ -3,15 +3,15 @@ import {
   GetItemCommand,
   GetItemCommandInput,
   GetItemCommandOutput,
-} from '@aws-sdk/client-dynamodb'
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+} from '@aws-sdk/client-dynamodb';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-const dynamoDb = new DynamoDBClient({})
+const dynamoDb = new DynamoDBClient({});
 
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  const id = event.pathParameters?.id
+  const id = event.pathParameters?.id;
 
   if (!id) {
     return {
@@ -20,7 +20,7 @@ export const handler = async (
         'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ message: 'Invalid request, ID is required' }),
-    }
+    };
   }
 
   const params: GetItemCommandInput = {
@@ -28,12 +28,12 @@ export const handler = async (
     Key: {
       id: { S: id },
     },
-  }
+  };
 
   try {
     const data: GetItemCommandOutput = await dynamoDb.send(
       new GetItemCommand(params),
-    )
+    );
 
     if (!data.Item) {
       return {
@@ -42,7 +42,7 @@ export const handler = async (
           'Access-Control-Allow-Origin': '*',
         },
         body: JSON.stringify({ message: 'Item not found' }),
-      }
+      };
     }
 
     return {
@@ -51,7 +51,7 @@ export const handler = async (
         'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify(data.Item),
-    }
+    };
   } catch (error) {
     return {
       statusCode: 500,
@@ -62,6 +62,6 @@ export const handler = async (
         message: 'Could not retrieve item',
         error: (error as Error).message,
       }),
-    }
+    };
   }
-}
+};
