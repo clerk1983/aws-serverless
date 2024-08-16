@@ -66,9 +66,6 @@ jobs:
           role-to-assume: arn:aws:iam::465068362057:role/github-actions-serverless-deploy
           aws-region: ap-northeast-1
 
-      - name: Sync OpenAPI files to S3
-        run: aws s3 sync ./doc s3://aws-serverless-backend-s3-ap-northeast-1-465068362057/doc --delete
-
       - name: SAM Deploy
         run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
 

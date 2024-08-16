@@ -1,3 +1,5 @@
+const API_END_POINT =
+  'https://c2k8uzdluh.execute-api.ap-northeast-1.amazonaws.com/Prod/'
 const EMPTY = 0
 const DARK = 1
 const LIGHT = 2
@@ -34,7 +36,13 @@ const showBoard = async (_board) => {
   })
 }
 
+const registerGame = async () => {
+  const result = await fetch(API_END_POINT + 'games', { method: 'POST' })
+  console.info(result)
+}
+
 const main = async () => {
+  await registerGame()
   await showBoard(INITIAL_BOARD)
 }
 
