@@ -117,24 +117,6 @@ Resources:
             Path: /games/latest/turns/{turnCount}
             Method: GET
 
-  GamesTable:
-    Type: "AWS::DynamoDB::Table"
-    Properties:
-      TableName: "rvs-games"
-      AttributeDefinitions:
-        - AttributeName: "id"
-          AttributeType: "S"
-        - AttributeName: "create_at"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "id"
-          KeyType: "HASH"
-        - AttributeName: "create_at"
-          KeyType: "RANGE"
-      BillingMode: "PAY_PER_REQUEST"
-    DeletionPolicy: Delete # Retain the table even if the stack is deleted
-    UpdateReplacePolicy: Delete # Retain the table even if the resource is replaced
-
   AttributesTable:
     Type: "AWS::DynamoDB::Table"
     Properties:
@@ -149,6 +131,20 @@ Resources:
     DeletionPolicy: Delete # Retain the table even if the stack is deleted
     UpdateReplacePolicy: Delete # Retain the table even if the resource is replaced
 
+  GamesTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "rvs-games"
+      AttributeDefinitions:
+        - AttributeName: "game_id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "game_id"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
+    DeletionPolicy: Delete # Retain the table even if the stack is deleted
+    UpdateReplacePolicy: Delete # Retain the table even if the resource is replaced
+
   TurnsTable:
     Type: "AWS::DynamoDB::Table"
     Properties:
@@ -156,12 +152,12 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "game_id"
           AttributeType: "S"
-        - AttributeName: "id"
-          AttributeType: "S"
+        - AttributeName: "turn_count"
+          AttributeType: "N"
       KeySchema:
         - AttributeName: "game_id"
           KeyType: "HASH"
-        - AttributeName: "id"
+        - AttributeName: "turn_count"
           KeyType: "RANGE"
       BillingMode: "PAY_PER_REQUEST"
     DeletionPolicy: Delete # Retain the table even if the stack is deleted
@@ -174,13 +170,9 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "turn_id"
           AttributeType: "S"
-        - AttributeName: "id"
-          AttributeType: "S"
       KeySchema:
         - AttributeName: "turn_id"
           KeyType: "HASH"
-        - AttributeName: "id"
-          KeyType: "RANGE"
       BillingMode: "PAY_PER_REQUEST"
     DeletionPolicy: Delete # Retain the table even if the stack is deleted
     UpdateReplacePolicy: Delete # Retain the table even if the resource is replaced

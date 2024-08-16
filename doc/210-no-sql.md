@@ -1,13 +1,17 @@
 # NoSQL(DynamoDB)
 
+## rsv-attributes
+
+key(PK), value
+
 ## rsv-game
 
-id, started_at, winner_disc, end_at
+game_id(PK), started_at, winner_disc, end_at
 
 ## rsv-turns
 
-id, game_id, turn_count, disc, x, y, next_disc, end_at
+game_id(PK), turn_count(SK), turn_id, disc, x, y, next_disc, end_at
 
 ## rsv-square
 
-id, turn_id, [{x, y, disc},...]
+turn_id(PK), [{x, y, disc},...]

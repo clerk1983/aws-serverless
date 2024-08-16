@@ -1,14 +1,14 @@
 import {
-  AttributeValue,
   DeleteItemCommand,
   DynamoDBClient,
   PutItemCommand,
   TransactWriteItemsCommand,
 } from '@aws-sdk/client-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import uuid from 'ui7';
-import { ALLOW_CORS } from '../HandlerUtil';
+import { ALLOW_CORS, KEY_LATEST_GAME_ID } from '../HandlerUtil';
 
 const EMPTY = '0';
 const DARK = '1';
@@ -24,8 +24,6 @@ const INITIAL_BOARD: string[][] = [
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
 ];
-
-const KEY_LATEST_GAME_ID = 'LATEST_GAME_ID';
 
 /**
  * POST /tasks
@@ -53,32 +51,25 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
       {
         Put: {
           TableName: process.env.TABLE_NAME_GAMES,
-          Item: {
-            id: { S: game_id },
-            create_at: { S: now },
-          } as Record<string, AttributeValue>,
+          Item: marshall({ game_id, create_at: now }),
         },
       },
       {
         Put: {
           TableName: process.env.TABLE_NAME_TURNS,
-          Item: {
-            id: { S: turn_id },
-            game_id: { S: game_id },
-            turn_count: { N: '0' },
-            next_disc: { N: DARK },
-            end_at: { S: now },
-          } as Record<string, AttributeValue>,
+          Item: marshall({
+            game_id,
+            turn_count: 0,
+            turn_id,
+            next_disc: DARK,
+            end_at: now,
+          }),
         },
       },
       {
         Put: {
           TableName: process.env.TABLE_NAME_SQUARE,
-          Item: {
-            id: { S: square_id },
-            turn_id: { S: turn_id },
-            square: genAttr(),
-          } as Record<string, AttributeValue>,
+          Item: marshall({ turn_id, square: genAttr() }),
         },
       },
     ],
@@ -91,18 +82,13 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
     await dynamoDb.send(
       new DeleteItemCommand({
         TableName: process.env.TABLE_NAME_ATTRIBUTES,
-        Key: {
-          key: { S: KEY_LATEST_GAME_ID },
-        },
+        Key: marshall({ key: KEY_LATEST_GAME_ID }),
       }),
     );
     await dynamoDb.send(
       new PutItemCommand({
         TableName: process.env.TABLE_NAME_ATTRIBUTES,
-        Item: {
-          key: { S: KEY_LATEST_GAME_ID },
-          value: { S: game_id },
-        },
+        Item: marshall({ key: KEY_LATEST_GAME_ID, value: game_id }),
       }),
     );
 
@@ -124,26 +110,17 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
   }
 };
 
-const genAttr = (): AttributeValue => {
-  return {
-    L: [...squareList],
-  };
-};
-
-const genSqr = (x: string, y: string, disc: string): AttributeValue => {
-  const attr = {
-    M: {
-      x: { N: x },
-      y: { N: y },
-      disc: { N: disc },
-    },
-  };
-  return attr;
-};
-
-const squareList: AttributeValue[] = [];
-INITIAL_BOARD.forEach((line, y) => {
-  line.forEach((disc, x) => {
-    squareList.push(genSqr(x.toString(), y.toString(), disc));
+const genAttr = () => {
+  const squareList: { x: string; y: string; disc: string }[] = [];
+  INITIAL_BOARD.forEach((line, y) => {
+    line.forEach((disc, x) => {
+      const item = {
+        x: x.toString(),
+        y: y.toString(),
+        disc,
+      };
+      squareList.push(item);
+    });
   });
-});
+  return squareList;
+};
