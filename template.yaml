@@ -85,6 +85,9 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME_GAMES: !Ref GamesTable # Environment variable pointing to the DynamoDB table
+          TABLE_NAME_TURNS: !Ref TurnsTable # Environment variable pointing to the DynamoDB table
+          TABLE_NAME_MOVES: !Ref MovesTable # Environment variable pointing to the DynamoDB table
+
       Events:
         Api:
           Type: Api
