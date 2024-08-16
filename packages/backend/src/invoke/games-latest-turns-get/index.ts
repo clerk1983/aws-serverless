@@ -59,14 +59,31 @@ export const handler = async (
       }),
     );
     console.info(`square=${JSON.stringify(square)}`);
-    const squareList = square.Item?.square
-      ? unmarshall(square.Item.square)
-      : undefined;
+    const squareItem = square.Item ? unmarshall(square.Item) : undefined;
+    if (!squareItem) {
+      throw new Error('Could not retrieve item');
+    }
+    const squareList = squareItem.square;
+    console.info(`squareList=${JSON.stringify(squareList)}`);
 
+    const board = Array.from(Array(8)).map(() => Array.from(Array(8)));
+    console.info(`board=${JSON.stringify(board)}`);
+    squareList.forEach((item: { x: string; y: string; disc: string }) => {
+      console.info(`item=${JSON.stringify(item)}`);
+      board[Number(item.y)][Number(item.x)] = item.disc;
+    });
+    console.info(`board=${JSON.stringify(board)}`);
+
+    const resBody = {
+      turnCount: Number(turnCount),
+      board,
+      nextDisc: turnItem.next_disc,
+      winnerDisc: null,
+    };
     return {
       statusCode: 200,
       headers: ALLOW_CORS,
-      body: JSON.stringify(squareList),
+      body: JSON.stringify(resBody),
     };
   } catch (error) {
     return {
