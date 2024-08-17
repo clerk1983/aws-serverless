@@ -1,4 +1,4 @@
-import { toDisc } from '../../domain/model/turn/Disc';
+import { Disc } from '../../domain/model/turn/Disc';
 import { Point } from '../../domain/model/turn/Point';
 import { TurnRepository } from '../../domain/model/turn/TurnRepository';
 
@@ -33,16 +33,14 @@ export class TurnUsecase {
    * ターンを登録する
    * @param game_id
    * @param turnCount
-   * @param x
-   * @param y
+   * @param point
    * @param disc
    */
   async registerTurn(
     game_id: string,
     turnCount: number,
-    x: number,
-    y: number,
-    disc: string,
+    point: Point,
+    disc: Disc,
   ): Promise<void> {
     // 1つ前のターンリポジトリから取得する
     const previousTurnCount = turnCount - 1;
@@ -52,7 +50,7 @@ export class TurnUsecase {
     );
 
     // 石を置く
-    const newTurn = previousTurn.placeNext(toDisc(disc), new Point(x, y));
+    const newTurn = previousTurn.placeNext(disc, point);
 
     // ターンを保存する
     await new TurnRepository().save(newTurn);

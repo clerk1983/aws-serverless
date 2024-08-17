@@ -1,3 +1,5 @@
+import { DomainError } from '../../error/DomainError';
+
 export const Disc = {
   Empty: '0',
   Dark: '1',
@@ -7,15 +9,12 @@ export const Disc = {
 
 export type Disc = (typeof Disc)[keyof typeof Disc];
 
-export const toDisc = (disc: string): Disc => {
-  switch (disc) {
-    case Disc.Dark:
-      return Disc.Dark;
-    case Disc.Light:
-      return Disc.Light;
-    default:
-      return Disc.Empty;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const toDisc = (disc: any): Disc => {
+  if (!Object.values(Disc).includes(disc)) {
+    throw new DomainError('InvalidDiscValue', 'Invalid Disc Value');
   }
+  return disc as Disc;
 };
 
 export const isOppositeDisc = (disc1: Disc, disc2: Disc): boolean => {

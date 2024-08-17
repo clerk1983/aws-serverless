@@ -2,7 +2,10 @@ type DomainErrorType =
   | 'SpecifiedTurnNotFound'
   | 'SelectedPointIsNotEmpty'
   | 'FlipPointIsEmpty'
-  | 'SelectedDiscIsNoNextDisc';
+  | 'SelectedDiscIsNoNextDisc'
+  | 'InvalidPoint'
+  | 'InvalidDiscValue'
+  | 'InvalidGameId';
 
 export class DomainError extends Error {
   constructor(
