@@ -104,6 +104,29 @@ export class Board {
 
     return flipPoints;
   }
+
+  /**
+   * 石を置ける場所があるか
+   * @param disc
+   * @returns
+   */
+  existsValidMove(disc: Disc): boolean {
+    for (let y = 0; y < this._discs.length; y++) {
+      const line = this._discs[y];
+      for (let x = 0; x < line.length; x++) {
+        const discOnBoard = line[x];
+        if (discOnBoard !== Disc.Empty) {
+          continue;
+        }
+        // ひっくり返せる場所があれば石がおける
+        const move = new Move(disc, new Point(x, y));
+        if (this.listFlipPoints(move).length > 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
 
 const E = Disc.Empty;

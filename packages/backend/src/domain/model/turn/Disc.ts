@@ -12,6 +12,7 @@ export type Disc = (typeof Disc)[keyof typeof Disc];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toDisc = (disc: any): Disc => {
   if (!Object.values(Disc).includes(disc)) {
+    console.error(disc);
     throw new DomainError('InvalidDiscValue', 'Invalid Disc Value');
   }
   return disc as Disc;

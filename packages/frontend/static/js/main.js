@@ -83,7 +83,6 @@ const showBoard = async (turnCount) => {
             x,
             y,
           );
-          console.log(registerTurnRes);
           if (registerTurnRes.ok) {
             await showBoard(nextTurnCount);
           }
@@ -95,7 +94,6 @@ const showBoard = async (turnCount) => {
 };
 
 const showNextDiscMessage = (nextDisc) => {
-  console.log(nextDiscMessage);
   if (nextDisc) {
     const color = nextDisc == DARK ? '黒' : '白';
     nextDiscMessage.innerHTML = `次は${color}の番です`;

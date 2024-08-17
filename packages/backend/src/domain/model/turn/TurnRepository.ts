@@ -18,7 +18,7 @@ interface TurnsTableItem {
   disc?: string;
   x?: string;
   y?: string;
-  next_disc: string;
+  next_disc?: string;
   end_at: string;
 }
 interface TurnsTableKey {
@@ -69,7 +69,9 @@ export class TurnRepository {
         move = new Move(disc, point);
       }
     }
-    const next_disc = turnItem.next_disc;
+    const next_disc = turnItem.next_disc
+      ? toDisc(turnItem.next_disc)
+      : undefined;
     const end_at = turnItem.end_at;
 
     const squareKey: SquareTableKey = {
@@ -88,14 +90,7 @@ export class TurnRepository {
     });
     console.info(`board=${JSON.stringify(_board)}`);
     const board = new Board(_board);
-    const turn = new Turn(
-      game_id,
-      turn_count,
-      toDisc(next_disc),
-      move,
-      board,
-      end_at,
-    );
+    const turn = new Turn(game_id, turn_count, next_disc, move, board, end_at);
     return turn;
   }
 

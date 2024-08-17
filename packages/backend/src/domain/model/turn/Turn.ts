@@ -12,7 +12,7 @@ export class Turn {
   constructor(
     private _gameId: string,
     private _turnCount: number,
-    private _nextDisc: Disc,
+    private _nextDisc: Disc | undefined,
     private _move: Move | undefined,
     private _board: Board,
     private _endAt: string,
@@ -26,19 +26,39 @@ export class Turn {
 
     const move = new Move(disc, point);
 
-    const newBoard = this._board.place(move);
+    const nextBoard = this._board.place(move);
 
-    // TODO 次の石が置けないときはスキップ
-    const nextDisc = disc === Disc.Dark ? Disc.Light : Disc.Dark;
+    const nextDisc = this.decideNextDisc(nextBoard, disc);
 
     return new Turn(
       this._gameId,
       this._turnCount + 1,
       nextDisc,
       move,
-      newBoard,
+      nextBoard,
       dayjs().toISOString(),
     );
+  }
+
+  /**
+   * 次における石を決定
+   * @param board
+   * @param previousDisc
+   * @returns
+   */
+  private decideNextDisc(board: Board, previousDisc: Disc): Disc | undefined {
+    const existsDarkValidMove = board.existsValidMove(Disc.Dark);
+    const existsLightValidMove = board.existsValidMove(Disc.Light);
+    if (existsDarkValidMove && existsLightValidMove) {
+      return previousDisc === Disc.Dark ? Disc.Light : Disc.Dark;
+    } else if (!existsDarkValidMove && !existsLightValidMove) {
+      // 決着
+      return undefined;
+    } else if (existsDarkValidMove) {
+      return Disc.Dark;
+    } else {
+      return Disc.Light;
+    }
   }
 
   get gameId(): string {
@@ -50,7 +70,7 @@ export class Turn {
   get turnId(): string {
     return this._turnId;
   }
-  get nextDisc(): Disc {
+  get nextDisc(): Disc | undefined {
     return this._nextDisc;
   }
   get move(): Move | undefined {
