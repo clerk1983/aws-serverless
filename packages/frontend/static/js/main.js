@@ -5,17 +5,25 @@ const DARK = '1';
 const LIGHT = '2';
 
 const registerGame = async () => {
-  const result = await fetch(`${API_END_POINT}games`, { method: 'POST' });
+  sessionStorage.clear();
+  const uuid = uuidv4();
+  sessionStorage.setItem('gameId', uuid);
+  await fetch(`${API_END_POINT}games/${uuid}`, {
+    method: 'POST',
+  });
 };
 
 const registerTurn = async (turnCount, disc, x, y) => {
+  const gameId = sessionStorage.getItem('gameId');
   const _body = {
     turnCount,
-    disc,
-    x,
-    y,
+    move: {
+      disc,
+      x,
+      y,
+    },
   };
-  const result = await fetch(`${API_END_POINT}games/latest/turns`, {
+  const result = await fetch(`${API_END_POINT}games/${gameId}/turns`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -26,9 +34,10 @@ const registerTurn = async (turnCount, disc, x, y) => {
 };
 
 const showBoard = async () => {
+  const gameId = sessionStorage.getItem('gameId');
   const turnCount = 0;
   const response = await fetch(
-    `${API_END_POINT}games/latest/turns/${turnCount}`,
+    `${API_END_POINT}games/${gameId}/turns/${turnCount}`,
     { method: 'GET' },
   );
   const resBody = await response.json();

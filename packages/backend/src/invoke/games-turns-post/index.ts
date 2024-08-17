@@ -1,42 +1,36 @@
-// import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
-import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { ALLOW_CORS, KEY_LATEST_GAME_ID } from '../HandlerUtil';
+import { ALLOW_CORS } from '../HandlerUtil';
 
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  const turnCount = event.pathParameters?.turnCount;
-  console.info(`turnCount=${turnCount}`);
-  if (!turnCount) {
+  console.info(`event=${JSON.stringify(event)}`);
+  const game_id = event.pathParameters?.gameId;
+  console.info(`game_id=${game_id}`);
+  if (!game_id || !event.body)
     return {
       statusCode: 400,
       headers: ALLOW_CORS,
       body: JSON.stringify({ message: 'Invalid request' }),
     };
-  }
+  const body = JSON.parse(event.body);
+  const turnCount = parseInt(body.turnCount);
+  const x = parseInt(body.move.x);
+  const y = parseInt(body.move.y);
+  const disc = parseInt(body.move.disc);
+  console.info(`turnCount=${turnCount}, x=${x}, y=${y}, disc=${disc}`);
+
+  // 1つ前のターンを取得する
+  const previousTurnCount = turnCount - 1;
+
   const dynamoDb = new DynamoDBClient({ region: 'ap-northeast-1' });
   try {
-    // 最新のゲームIDを取得
-    const attr = await dynamoDb.send(
-      new GetItemCommand({
-        TableName: process.env.TABLE_NAME_ATTRIBUTES,
-        Key: {
-          key: { S: KEY_LATEST_GAME_ID },
-        },
-      }),
-    );
-    const game_id = attr.Item?.value.S ?? '';
-    console.info(`game_id=${game_id}`);
-
     const turns = await dynamoDb.send(
       new GetItemCommand({
         TableName: process.env.TABLE_NAME_TURNS,
-        Key: {
-          game_id: { S: game_id },
-          turn_count: { N: turnCount },
-        },
+        Key: marshall({ game_id, turn_count: previousTurnCount }),
       }),
     );
     console.info(`turns=${JSON.stringify(turns)}`);
@@ -53,9 +47,7 @@ export const handler = async (
     const square = await dynamoDb.send(
       new GetItemCommand({
         TableName: process.env.TABLE_NAME_SQUARE,
-        Key: {
-          turn_id: { S: turnItem.turn_id },
-        },
+        Key: marshall({ turn_id: turnItem.turn_id }),
       }),
     );
     console.info(`square=${JSON.stringify(square)}`);
@@ -66,6 +58,7 @@ export const handler = async (
     const squareList = squareItem.square;
     console.info(`squareList=${JSON.stringify(squareList)}`);
 
+    // 空の盤面を生成し、ディスク情報を設定
     const board = Array.from(Array(8)).map(() => Array.from(Array(8)));
     console.info(`board=${JSON.stringify(board)}`);
     squareList.forEach((item: { x: string; y: string; disc: string }) => {
@@ -74,18 +67,21 @@ export const handler = async (
     });
     console.info(`board=${JSON.stringify(board)}`);
 
-    const resBody = {
-      turnCount: Number(turnCount),
-      board,
-      nextDisc: turnItem.next_disc,
-      winnerDisc: null,
-    };
+    // 盤面に置けるかチェック
+
+    // 石を置く
+
+    // ひっくり返す
+
+    // ターンを保存する
+
     return {
-      statusCode: 200,
+      statusCode: 201,
       headers: ALLOW_CORS,
-      body: JSON.stringify(resBody),
+      body: '',
     };
   } catch (error) {
+    console.error(error);
     return {
       statusCode: 500,
       headers: ALLOW_CORS,

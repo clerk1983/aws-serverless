@@ -95,15 +95,15 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BackendFunctionApi
-            Path: /games
+            Path: /games/{gameId}
             Method: POST
 
-  GamesLatestTurnsGet:
+  GamesTurnsGetFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler # The handler for the Lambda function
       Runtime: nodejs20.x # Runtime environment for the Lambda function
-      CodeUri: ./packages/backend/dist/invoke/games-latest-turns-get # Path to the function code
+      CodeUri: ./packages/backend/dist/invoke/games-turns-get # Path to the function code
       Role: !GetAtt BackendFunctionExecutionRole.Arn # IAM role for the Lambda function
       Environment:
         Variables:
@@ -117,15 +117,15 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BackendFunctionApi
-            Path: /games/latest/turns/{turnCount}
+            Path: /games/{gameId}/turns/{turnCount}
             Method: GET
 
-  GamesLatestTurnsPost:
+  GamesTurnsPostFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler # The handler for the Lambda function
       Runtime: nodejs20.x # Runtime environment for the Lambda function
-      CodeUri: ./packages/backend/dist/invoke/games-latest-turns-post # Path to the function code
+      CodeUri: ./packages/backend/dist/invoke/games-turns-post # Path to the function code
       Role: !GetAtt BackendFunctionExecutionRole.Arn # IAM role for the Lambda function
       Environment:
         Variables:
@@ -139,7 +139,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref BackendFunctionApi
-            Path: /games/latest/turns
+            Path: /games/{gameId}/turns
             Method: POST
 
   AttributesTable:

@@ -9,21 +9,24 @@ servers:
       basePath:
         default: Prod
 paths:
-  /games:
+  /games/{gameId}:
+    parameters:
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 12345678-1234-5678-1234-567812345678
+          description: Game_ID
     post:
-      summary: Create new game
       description: 新規ゲーム開始
       responses:
         201:
           description: Created
-      x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations
-        passthroughBehavior: when_no_match
-        type: aws_proxy
 
     get:
-      summary: Retrieve game information
-      description: ゲーム情報を取得する
+      description: ゲームの情報を取得する
       responses:
         200:
           description: OK
@@ -48,8 +51,16 @@ paths:
                           format: date-time
                           example: 2020-01-01T00:00:00Z
 
-  /games/latest/turns/{turnCount}:
+  /games/{gameId}/turns/{turnCount}:
     parameters:
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 12345678-1234-5678-1234-567812345678
+          description: Game_ID
       - name: turnCount
         in: path
         required: true
@@ -57,7 +68,6 @@ paths:
           type: integer
           format: int32
     get:
-      summary: Get turn by turnCount
       description: 特定のターンの盤情報を取得する
       responses:
         "200":
@@ -88,14 +98,18 @@ paths:
                     type: integer
                     format: int32
                     example: 1
-      x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksGetFunction-34mkEI7AkSd9/invocations
-        passthroughBehavior: when_no_match
-        type: aws_proxy
 
-  /games/latest/turns:
+  /games/{gameId}/turns:
+    parameters:
+      - name: gameId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 12345678-1234-5678-1234-567812345678
+          description: Game_ID
     post:
-      summary: Post my move
       description: 石を置く
       requestBody:
         required: true
@@ -123,10 +137,6 @@ paths:
                       type: integer
                       format: int32
                       example: 1
-      x-amazon-apigateway-integration:
-        uri: arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:465068362057:function:aws-serverless-TasksPostFunction-R4zT1DCm82cN/invocations
-        passthroughBehavior: when_no_match
-        type: aws_proxy
       responses:
         "201":
           description: Created
@@ -136,31 +146,3 @@ paths:
 components:
   schemas:
     Empty: {}
-
-    TaskRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the task
-        text:
-          type: string
-          description: The text content of the task
-      required:
-        - id
-        - text
-    TaskResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the created task
-        text:
-          type: string
-          description: The text content of the created task
-        createdAt:
-          type: string
-          format: date-time
-          description: Timestamp when the task was created

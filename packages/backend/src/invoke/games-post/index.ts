@@ -1,14 +1,12 @@
 import {
-  DeleteItemCommand,
   DynamoDBClient,
-  PutItemCommand,
   TransactWriteItemsCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
-import { APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import uuid from 'ui7';
-import { ALLOW_CORS, KEY_LATEST_GAME_ID } from '../HandlerUtil';
+import { ALLOW_CORS } from '../HandlerUtil';
 
 const EMPTY = '0';
 const DARK = '1';
@@ -31,8 +29,17 @@ const INITIAL_BOARD: string[][] = [
  * @param event
  * @returns
  */
-export const handler = async (): Promise<APIGatewayProxyResult> => {
-  const game_id = uuid() as string;
+export const handler = async (
+  event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> => {
+  const game_id = event.pathParameters?.gameId;
+  if (!game_id) {
+    return {
+      statusCode: 400,
+      headers: ALLOW_CORS,
+      body: JSON.stringify({ message: 'Invalid request' }),
+    };
+  }
   const now = dayjs().toISOString();
   console.info(`game_id=${game_id}, now=${now}`);
   const turn_id = uuid() as string;
@@ -77,20 +84,7 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
   const dynamoDb = new DynamoDBClient({ region: 'ap-northeast-1' });
   try {
     const result = await dynamoDb.send(new TransactWriteItemsCommand(params));
-    console.info(`Transaction successful: ${result}`);
-
-    await dynamoDb.send(
-      new DeleteItemCommand({
-        TableName: process.env.TABLE_NAME_ATTRIBUTES,
-        Key: marshall({ key: KEY_LATEST_GAME_ID }),
-      }),
-    );
-    await dynamoDb.send(
-      new PutItemCommand({
-        TableName: process.env.TABLE_NAME_ATTRIBUTES,
-        Item: marshall({ key: KEY_LATEST_GAME_ID, value: game_id }),
-      }),
-    );
+    console.info(`Transaction successful: ${JSON.stringify(result)}`);
 
     return {
       statusCode: 201,
