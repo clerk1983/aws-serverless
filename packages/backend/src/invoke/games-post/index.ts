@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { GameUsecase } from '../../application/GameUsecase';
-import { ALLOW_CORS } from '../HandlerUtil';
+import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
 /**
  * POST /tasks
@@ -27,14 +27,6 @@ export const handler = async (
       body: 'Created',
     };
   } catch (error) {
-    console.error(error);
-    return {
-      statusCode: 500,
-      headers: ALLOW_CORS,
-      body: JSON.stringify({
-        message: 'System error',
-        error: (error as Error).message,
-      }),
-    };
+    return errorResponse(error);
   }
 };

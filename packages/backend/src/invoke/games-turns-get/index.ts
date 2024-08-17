@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { TurnUsecase } from '../../application/TurnUsecase';
-import { ALLOW_CORS } from '../HandlerUtil';
+import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
 interface ResponseBody {
   turnCount: number;
@@ -38,14 +38,6 @@ export const handler = async (
       body: JSON.stringify(resBody),
     };
   } catch (error) {
-    console.error(error);
-    return {
-      statusCode: 500,
-      headers: ALLOW_CORS,
-      body: JSON.stringify({
-        message: 'Could not retrieve item',
-        error: (error as Error).message,
-      }),
-    };
+    return errorResponse(error);
   }
 };

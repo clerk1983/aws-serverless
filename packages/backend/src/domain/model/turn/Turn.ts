@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import uuid from 'ui7';
+import { DomainError } from '../../error/DomainError';
 import { Board, INITIAL_BOARD } from './Board';
 import { Disc } from './Disc';
 import { Move } from './Move';
@@ -20,7 +21,7 @@ export class Turn {
   placeNext(disc: Disc, point: Point): Turn {
     // 打とうした石が次の石では無い場合は置くことはできない
     if (disc !== this._nextDisc) {
-      throw new Error('Invalid disc');
+      throw new DomainError('SelectedDiscIsNoNextDisc', 'Invalid disc');
     }
 
     const move = new Move(disc, point);

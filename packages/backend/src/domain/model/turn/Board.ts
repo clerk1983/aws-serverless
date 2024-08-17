@@ -1,3 +1,4 @@
+import { DomainError } from '../../error/DomainError';
 import { Disc, isOppositeDisc } from './Disc';
 import { Move } from './Move';
 import { Point } from './Point';
@@ -12,13 +13,16 @@ export class Board {
     // 盤面におけるかチェック
     // 空のマス目であること
     if (this._discs[move.point.y][move.point.x] !== Disc.Empty) {
-      throw new Error(`Selected point is not empty`);
+      throw new DomainError(
+        'SelectedPointIsNotEmpty',
+        `Selected point is not empty`,
+      );
     }
 
     // ひっくり返せる点をリストアップ
     const flipPoints = this.listFlipPoints(move);
     if (flipPoints.length === 0) {
-      throw new Error(`Flip points is empty`);
+      throw new DomainError('FlipPointIsEmpty', `Flip points is empty`);
     }
 
     // 盤面をコピー

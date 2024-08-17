@@ -4,6 +4,7 @@ import {
   TransactWriteItemsCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { DomainError } from '../../error/DomainError';
 import { Board } from './Board';
 import { Disc, toDisc } from './Disc';
 import { Move } from './Move';
@@ -108,7 +109,10 @@ export class TurnRepository {
     );
     console.info(`turns=${JSON.stringify(turns)}`);
     if (!turns.Item) {
-      throw new Error('Could not retrieve by rvs-turns');
+      throw new DomainError(
+        'SpecifiedTurnNotFound',
+        'Specified Turn Not Found',
+      );
     }
     const turnItem = unmarshall(turns.Item) as TurnsTableItem;
     return turnItem;
@@ -124,7 +128,10 @@ export class TurnRepository {
     );
     console.info(`square=${JSON.stringify(square)}`);
     if (!square.Item) {
-      throw new Error('Could not retrieve item by rvs-squares');
+      throw new DomainError(
+        'SpecifiedTurnNotFound',
+        'Could not retrieve item by rvs-squares',
+      );
     }
     const squareItem = unmarshall(square.Item) as SquareTableItem;
     return squareItem;
