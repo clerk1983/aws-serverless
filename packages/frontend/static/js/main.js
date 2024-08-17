@@ -4,6 +4,11 @@ const EMPTY = '0';
 const DARK = '1';
 const LIGHT = '2';
 
+const nextDiscMessage = document.querySelector('#next-disc-message');
+
+/**
+ * 新規ゲームを開始する
+ */
 const registerGame = async () => {
   sessionStorage.clear();
   const uuid = uuidv4();
@@ -13,6 +18,13 @@ const registerGame = async () => {
   });
 };
 
+/**
+ * 打った手を登録する
+ * @param {*} turnCount
+ * @param {*} disc
+ * @param {*} x
+ * @param {*} y
+ */
 const registerTurn = async (turnCount, disc, x, y) => {
   const gameId = sessionStorage.getItem('gameId');
   const _body = {
@@ -30,8 +42,13 @@ const registerTurn = async (turnCount, disc, x, y) => {
     },
     body: JSON.stringify(_body),
   });
+  return result;
 };
 
+/**
+ * 盤面を取得する
+ * @param {*} turnCount
+ */
 const showBoard = async (turnCount) => {
   const gameId = sessionStorage.getItem('gameId');
   const response = await fetch(
@@ -41,10 +58,12 @@ const showBoard = async (turnCount) => {
   const resBody = await response.json();
   const board = resBody.board;
   const nextDisc = resBody.nextDisc;
+  showNextDiscMessage(nextDisc);
   const boardElement = document.querySelector('#board');
   while (boardElement.firstChild) {
     boardElement.removeChild(boardElement.firstChild);
   }
+
   board.forEach((line, y) => {
     line.forEach((square, x) => {
       const squareElement = document.createElement('div');
@@ -55,15 +74,34 @@ const showBoard = async (turnCount) => {
         stoneElement.className = `stone ${color}`;
         squareElement.appendChild(stoneElement);
       } else {
+        // ディスクを置いたら登録するようにリスナー登録
         squareElement.addEventListener('click', async () => {
           const nextTurnCount = turnCount + 1;
-          await registerTurn(nextTurnCount, nextDisc, x, y);
-          await showBoard(nextTurnCount);
+          const registerTurnRes = await registerTurn(
+            nextTurnCount,
+            nextDisc,
+            x,
+            y,
+          );
+          console.log(registerTurnRes);
+          if (registerTurnRes.ok) {
+            await showBoard(nextTurnCount);
+          }
         });
       }
       boardElement.appendChild(squareElement);
     });
   });
+};
+
+const showNextDiscMessage = (nextDisc) => {
+  console.log(nextDiscMessage);
+  if (nextDisc) {
+    const color = nextDisc == DARK ? '黒' : '白';
+    nextDiscMessage.innerHTML = `次は${color}の番です`;
+  } else {
+    nextDiscMessage.innerHTML = '';
+  }
 };
 
 const main = async () => {
