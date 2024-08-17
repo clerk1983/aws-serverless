@@ -1,3 +1,4 @@
+import { ApplicationError } from '../application/error/ApplicationError';
 import { DomainError } from '../domain/error/DomainError';
 
 /**
@@ -20,6 +21,19 @@ export const errorResponse = (error: Error) => {
         message: error.message,
       }),
     };
+  }
+  if (error instanceof ApplicationError) {
+    switch (error.type) {
+      case 'LatestGameNotFound':
+        return {
+          statusCode: 404,
+          headers: ALLOW_CORS,
+          body: JSON.stringify({
+            type: error.type,
+            message: error.message,
+          }),
+        };
+    }
   }
   return {
     statusCode: 500,
