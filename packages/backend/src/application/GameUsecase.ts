@@ -1,7 +1,7 @@
-import { Game } from '../domain/game/Game';
-import { GameRepository } from '../domain/game/GameRepository';
-import { initialTurn } from '../domain/turn/Turn';
-import { TurnRepository } from '../domain/turn/TurnRepository';
+import { Game } from '../domain/model/game/Game';
+import { GameRepository } from '../domain/model/game/GameRepository';
+import { initialTurn } from '../domain/model/turn/Turn';
+import { TurnRepository } from '../domain/model/turn/TurnRepository';
 
 /**
  * ゲームユースケース
