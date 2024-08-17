@@ -5,6 +5,7 @@ import {
 import { marshall } from '@aws-sdk/util-dynamodb';
 import dayjs from 'dayjs';
 import uuid from 'ui7';
+import { GamesTableItem, SquareTableItem, TurnsTableItem } from '../dataaccrss';
 import { DARK, EMPTY, LIGHT } from '../invoke/HandlerUtil';
 
 const INITIAL_BOARD: string[][] = [
@@ -40,30 +41,40 @@ export class GameUsecase {
 
     const square_id = uuid() as string;
     console.info(`square_id=${square_id}`);
+
+    const gameItem: GamesTableItem = {
+      game_id,
+      create_at: now,
+    };
+    const turnItem: TurnsTableItem = {
+      game_id,
+      turn_count: 0,
+      turn_id,
+      next_disc: DARK,
+      end_at: now,
+    };
+    const squareItem: SquareTableItem = {
+      turn_id,
+      square: this.genAttr(),
+    };
     const params = {
       TransactItems: [
         {
           Put: {
             TableName: process.env.TABLE_NAME_GAMES,
-            Item: marshall({ game_id, create_at: now }),
+            Item: marshall(gameItem),
           },
         },
         {
           Put: {
             TableName: process.env.TABLE_NAME_TURNS,
-            Item: marshall({
-              game_id,
-              turn_count: 0,
-              turn_id,
-              next_disc: DARK,
-              end_at: now,
-            }),
+            Item: marshall(turnItem),
           },
         },
         {
           Put: {
             TableName: process.env.TABLE_NAME_SQUARE,
-            Item: marshall({ turn_id, square: this.genAttr() }),
+            Item: marshall(squareItem),
           },
         },
       ],
