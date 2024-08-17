@@ -127,6 +127,12 @@ export class Board {
     }
     return false;
   }
+
+  count(disc: Disc): number {
+    return this._discs
+      .map((line) => line.filter((discOnBoard) => discOnBoard === disc).length)
+      .reduce((acc, cur) => acc + cur, 0);
+  }
 }
 
 const E = Disc.Empty;

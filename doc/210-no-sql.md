@@ -44,7 +44,3 @@ erDiagram
 
     SQUARES ||--o{ square : "contains"
 ```
-
-## rsv-attributes
-
-key(S,PK), value(S)

@@ -1,7 +1,4 @@
-import {
-  DynamoDBClient,
-  TransactWriteItemsCommand,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { Game } from './Game';
 
@@ -25,18 +22,13 @@ export class GameRepository {
       game_id: game.gameId,
       create_at: game.createAt,
     };
-    console.info(`gameItem=${JSON.stringify(gameItem)}`);
+    console.info(`gameItem=${JSON.stringify(gameItem, null, 2)}`);
     // ゲームを保存する
     const params = {
-      TransactItems: [
-        {
-          Put: {
-            TableName: process.env.TABLE_NAME_GAMES,
-            Item: marshall(gameItem),
-          },
-        },
-      ],
+      TableName: process.env.TABLE_NAME_GAMES,
+      Item: marshall(gameItem),
     };
-    await this.dynamoDb.send(new TransactWriteItemsCommand(params));
+    const result = await this.dynamoDb.send(new PutItemCommand(params));
+    console.info(`result=${JSON.stringify(result, null, 2)}`);
   }
 }

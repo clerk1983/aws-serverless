@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import uuid from 'ui7';
 import { DomainError } from '../../error/DomainError';
+import { WinnerDisc } from '../gameResult/WinnerDisc';
 import { Board, INITIAL_BOARD } from './Board';
 import { Disc } from './Disc';
 import { Move } from './Move';
@@ -38,6 +39,22 @@ export class Turn {
       nextBoard,
       dayjs().toISOString(),
     );
+  }
+
+  gameEnded(): boolean {
+    return this.nextDisc === undefined;
+  }
+
+  winnerDisc(): WinnerDisc {
+    const darkCount = this._board.count(Disc.Dark);
+    const lightCount = this._board.count(Disc.Light);
+    if (darkCount > lightCount) {
+      return WinnerDisc.Dark;
+    } else if (darkCount < lightCount) {
+      return WinnerDisc.Light;
+    } else {
+      return WinnerDisc.Dark;
+    }
   }
 
   /**

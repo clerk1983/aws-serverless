@@ -1,3 +1,5 @@
+import { GameResult } from '../../domain/model/gameResult/GameResult';
+import { GameResultRepository } from '../../domain/model/gameResult/GameResultRepository';
 import { Disc } from '../../domain/model/turn/Disc';
 import { Point } from '../../domain/model/turn/Point';
 import { TurnRepository } from '../../domain/model/turn/TurnRepository';
@@ -20,11 +22,13 @@ export class TurnUsecase {
   async findTurn(game_id: string, turn_count: number): Promise<FindTurnOutput> {
     // リポジトリから取得
     const turn = await new TurnRepository().findTurn(game_id, turn_count);
+    let gameResult: GameResult | undefined;
+    gameResult = await new GameResultRepository().find(game_id);
     const res: FindTurnOutput = {
       turnCount: Number(turn_count),
       board: turn.board.discs,
       nextDisc: turn.nextDisc,
-      winnerDisc: undefined,
+      winnerDisc: gameResult?.winnerDisc,
     };
     return res;
   }
@@ -54,5 +58,13 @@ export class TurnUsecase {
 
     // ターンを保存する
     await new TurnRepository().save(newTurn);
+
+    // 勝敗が決した場合、勝敗を保存
+    if (newTurn.gameEnded()) {
+      const winnerDisc = newTurn.winnerDisc();
+      console.info(`winnerDisc: ${winnerDisc}`);
+      const gameResult = new GameResult(game_id, winnerDisc, newTurn.endAt);
+      new GameResultRepository().save(gameResult);
+    }
   }
 }

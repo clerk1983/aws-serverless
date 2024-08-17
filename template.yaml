@@ -88,7 +88,6 @@ Resources:
           TABLE_NAME_GAMES: !Ref GamesTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_TURNS: !Ref TurnsTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_SQUARE: !Ref SquareTable # Environment variable pointing to the DynamoDB table
-          TABLE_NAME_ATTRIBUTES: !Ref AttributesTable # Environment variable pointing to the DynamoDB table
 
       Events:
         Api:
@@ -110,7 +109,6 @@ Resources:
           TABLE_NAME_GAMES: !Ref GamesTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_TURNS: !Ref TurnsTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_SQUARE: !Ref SquareTable # Environment variable pointing to the DynamoDB table
-          TABLE_NAME_ATTRIBUTES: !Ref AttributesTable # Environment variable pointing to the DynamoDB table
 
       Events:
         Api:
@@ -132,7 +130,6 @@ Resources:
           TABLE_NAME_GAMES: !Ref GamesTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_TURNS: !Ref TurnsTable # Environment variable pointing to the DynamoDB table
           TABLE_NAME_SQUARE: !Ref SquareTable # Environment variable pointing to the DynamoDB table
-          TABLE_NAME_ATTRIBUTES: !Ref AttributesTable # Environment variable pointing to the DynamoDB table
 
       Events:
         Api:
@@ -141,20 +138,6 @@ Resources:
             RestApiId: !Ref BackendFunctionApi
             Path: /games/{gameId}/turns
             Method: POST
-
-  AttributesTable:
-    Type: "AWS::DynamoDB::Table"
-    Properties:
-      TableName: "rvs-attributes"
-      AttributeDefinitions:
-        - AttributeName: "key"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "key"
-          KeyType: "HASH"
-      BillingMode: "PAY_PER_REQUEST"
-    DeletionPolicy: Delete # Retain the table even if the stack is deleted
-    UpdateReplacePolicy: Delete # Retain the table even if the resource is replaced
 
   GamesTable:
     Type: "AWS::DynamoDB::Table"
