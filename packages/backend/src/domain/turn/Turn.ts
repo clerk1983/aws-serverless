@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import uuid from 'ui7';
-import { DARK, LIGHT } from '../invoke/HandlerUtil';
-import { Board } from './Board';
+import { Board, INITIAL_BOARD } from './Board';
 import { Disc } from './Disc';
 import { Move } from './Move';
 import { Point } from './Point';
@@ -29,7 +28,7 @@ export class Turn {
     const newBoard = this._board.place(move);
 
     // TODO 次の石が置けないときはスキップ
-    const nextDisc = disc === DARK ? LIGHT : DARK;
+    const nextDisc = disc === Disc.Dark ? Disc.Light : Disc.Dark;
 
     return new Turn(
       this._gameId,
@@ -63,3 +62,6 @@ export class Turn {
     return this._endAt;
   }
 }
+export const initialTurn = (game_id: string, end_at: string) => {
+  return new Turn(game_id, 0, Disc.Dark, undefined, INITIAL_BOARD, end_at);
+};

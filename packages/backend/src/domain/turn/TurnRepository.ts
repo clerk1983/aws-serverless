@@ -145,17 +145,19 @@ export class TurnRepository {
       next_disc: turn.nextDisc,
       end_at: turn.endAt,
     };
+    console.info(`turnsItem=${JSON.stringify(turnsItem)}`);
     const squaresItem: SquareTableItem = {
       turn_id: turn.turnId,
       square: this.genAttr(turn.board.discs),
     };
+    console.info(`squaresItem=${JSON.stringify(squaresItem)}`);
     // ターンを保存する
     const params = {
       TransactItems: [
         {
           Put: {
             TableName: process.env.TABLE_NAME_TURNS,
-            Item: marshall(turnsItem),
+            Item: marshall(turnsItem, { removeUndefinedValues: true }),
           },
         },
         {
