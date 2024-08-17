@@ -3,6 +3,13 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { TurnUsecase } from '../../application/TurnUsecase';
 import { ALLOW_CORS } from '../HandlerUtil';
 
+interface ResponseBody {
+  turnCount: number;
+  board: string[][];
+  nextDisc?: string;
+  winnerDisc?: string;
+}
+
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
@@ -17,7 +24,10 @@ export const handler = async (
     };
   }
   try {
-    const resBody = await new TurnUsecase().findTurn(game_id, turn_count);
+    const resBody: ResponseBody = await new TurnUsecase().findTurn(
+      game_id,
+      turn_count,
+    );
     return {
       statusCode: 200,
       headers: ALLOW_CORS,
