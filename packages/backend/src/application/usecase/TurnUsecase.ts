@@ -64,7 +64,7 @@ export class TurnUsecase {
       const winnerDisc = newTurn.winnerDisc();
       console.info(`winnerDisc: ${winnerDisc}`);
       const gameResult = new GameResult(game_id, winnerDisc, newTurn.endAt);
-      new GameResultRepository().save(gameResult);
+      await new GameResultRepository().save(gameResult);
     }
   }
 }

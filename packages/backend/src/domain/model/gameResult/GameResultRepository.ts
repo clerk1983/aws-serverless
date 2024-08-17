@@ -10,6 +10,10 @@ interface GamesTableItem {
   winner_disc?: string;
   end_at?: string;
 }
+interface GamesTableUpdateItem {
+  ':winner_disc': string;
+  ':end_at': string;
+}
 interface GamesTableKey {
   game_id: string;
 }
@@ -53,9 +57,9 @@ export class GameResultRepository {
     const gameKey: GamesTableKey = {
       game_id: gameResult.gameId,
     };
-    const gameItem: GamesTableItem = {
-      winner_disc: gameResult.winnerDisc,
-      end_at: gameResult.endAt,
+    const gameItem: GamesTableUpdateItem = {
+      ':winner_disc': gameResult.winnerDisc,
+      ':end_at': gameResult.endAt,
     };
     console.info(
       `gameKey=${JSON.stringify(gameKey, null, 2)}, gameItem=${JSON.stringify(gameItem)}`,
