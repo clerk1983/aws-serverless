@@ -25,7 +25,7 @@ export class GameUsecase {
    * 新規ゲーム開始
    * @param game_id ゲームID
    */
-  async startNewGame(game_id: string) {
+  async startNewGame(game_id: string): Promise<void> {
     console.log('start new game');
     const now = dayjs().toISOString();
     console.info(`game_id=${game_id}, now=${now}`);

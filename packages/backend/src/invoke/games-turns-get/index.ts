@@ -1,4 +1,3 @@
-// import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { TurnUsecase } from '../../application/TurnUsecase';
 import { ALLOW_CORS } from '../HandlerUtil';
