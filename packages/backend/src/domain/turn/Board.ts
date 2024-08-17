@@ -20,7 +20,6 @@ export class Board {
     if (flipPoints.length === 0) {
       throw new Error(`Flip points is empty`);
     }
-    // ひっくり返せる点以外はエラー
 
     // 盤面をコピー
     const newDiscs = this._discs.map((line) => {
@@ -29,7 +28,10 @@ export class Board {
     // 石を置く
     newDiscs[move.point.y][move.point.x] = move.disc;
 
-    // TODO ひっくり返す
+    // ひっくり返す
+    flipPoints.forEach((p) => {
+      newDiscs[p.y][p.x] = move.disc;
+    });
 
     return new Board(newDiscs);
   }

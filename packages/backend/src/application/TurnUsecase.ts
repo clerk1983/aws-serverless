@@ -51,12 +51,8 @@ export class TurnUsecase {
       previousTurnCount,
     );
 
-    // 盤面に置けるかチェック
-
     // 石を置く
     const newTurn = previousTurn.placeNext(toDisc(disc), new Point(x, y));
-
-    // ひっくり返す
 
     // ターンを保存する
     await new TurnRepository().save(newTurn);
