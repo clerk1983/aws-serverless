@@ -30,12 +30,10 @@ const registerTurn = async (turnCount, disc, x, y) => {
     },
     body: JSON.stringify(_body),
   });
-  console.info(result);
 };
 
-const showBoard = async () => {
+const showBoard = async (turnCount) => {
   const gameId = sessionStorage.getItem('gameId');
-  const turnCount = 0;
   const response = await fetch(
     `${API_END_POINT}games/${gameId}/turns/${turnCount}`,
     { method: 'GET' },
@@ -60,7 +58,7 @@ const showBoard = async () => {
         squareElement.addEventListener('click', async () => {
           const nextTurnCount = turnCount + 1;
           await registerTurn(nextTurnCount, nextDisc, x, y);
-          showBoard();
+          await showBoard(nextTurnCount);
         });
       }
       boardElement.appendChild(squareElement);
@@ -70,7 +68,7 @@ const showBoard = async () => {
 
 const main = async () => {
   await registerGame();
-  await showBoard();
+  await showBoard(0);
 };
 
 main();

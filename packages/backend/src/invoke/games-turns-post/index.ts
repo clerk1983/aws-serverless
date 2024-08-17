@@ -1,7 +1,13 @@
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import {
+  DynamoDBClient,
+  GetItemCommand,
+  TransactWriteItemsCommand,
+} from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { ALLOW_CORS } from '../HandlerUtil';
+import dayjs from 'dayjs';
+import uuid from 'ui7';
+import { ALLOW_CORS, DARK, LIGHT } from '../HandlerUtil';
 
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -19,7 +25,7 @@ export const handler = async (
   const turnCount = parseInt(body.turnCount);
   const x = parseInt(body.move.x);
   const y = parseInt(body.move.y);
-  const disc = parseInt(body.move.disc);
+  const disc = body.move.disc as string;
   console.info(`turnCount=${turnCount}, x=${x}, y=${y}, disc=${disc}`);
 
   // 1つ前のターンを取得する
@@ -59,7 +65,9 @@ export const handler = async (
     console.info(`squareList=${JSON.stringify(squareList)}`);
 
     // 空の盤面を生成し、ディスク情報を設定
-    const board = Array.from(Array(8)).map(() => Array.from(Array(8)));
+    const board: string[][] = Array.from(Array(8)).map(() =>
+      Array.from(Array(8)),
+    );
     console.info(`board=${JSON.stringify(board)}`);
     squareList.forEach((item: { x: string; y: string; disc: string }) => {
       console.info(`item=${JSON.stringify(item)}`);
@@ -70,10 +78,41 @@ export const handler = async (
     // 盤面に置けるかチェック
 
     // 石を置く
+    board[y][x] = disc;
 
     // ひっくり返す
 
     // ターンを保存する
+    const next_disc = disc == DARK ? LIGHT : DARK;
+    const turn_id = uuid() as string;
+    const now = dayjs().toISOString();
+    const params = {
+      TransactItems: [
+        {
+          Put: {
+            TableName: process.env.TABLE_NAME_TURNS,
+            Item: marshall({
+              game_id,
+              turn_count: turnCount,
+              turn_id,
+              disc,
+              x: x.toString(),
+              y: y.toString(),
+              next_disc,
+              end_at: now,
+            }),
+          },
+        },
+        {
+          Put: {
+            TableName: process.env.TABLE_NAME_SQUARE,
+            Item: marshall({ turn_id, square: genAttr(board) }),
+          },
+        },
+      ],
+    };
+    const result = await dynamoDb.send(new TransactWriteItemsCommand(params));
+    console.info(`Transaction successful: ${JSON.stringify(result)}`);
 
     return {
       statusCode: 201,
@@ -91,4 +130,21 @@ export const handler = async (
       }),
     };
   }
+};
+
+const genAttr = (
+  board: string[][],
+): { x: string; y: string; disc: string }[] => {
+  const squareList: { x: string; y: string; disc: string }[] = [];
+  board.forEach((line, y) => {
+    line.forEach((disc, x) => {
+      const item = {
+        x: x.toString(),
+        y: y.toString(),
+        disc,
+      };
+      squareList.push(item);
+    });
+  });
+  return squareList;
 };

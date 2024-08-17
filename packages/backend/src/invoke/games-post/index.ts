@@ -6,11 +6,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import uuid from 'ui7';
-import { ALLOW_CORS } from '../HandlerUtil';
-
-const EMPTY = '0';
-const DARK = '1';
-const LIGHT = '2';
+import { ALLOW_CORS, DARK, EMPTY, LIGHT } from '../HandlerUtil';
 
 const INITIAL_BOARD: string[][] = [
   [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
@@ -104,7 +100,7 @@ export const handler = async (
   }
 };
 
-const genAttr = () => {
+const genAttr = (): { x: string; y: string; disc: string }[] => {
   const squareList: { x: string; y: string; disc: string }[] = [];
   INITIAL_BOARD.forEach((line, y) => {
     line.forEach((disc, x) => {
