@@ -193,7 +193,7 @@ export class TurnUsecase {
     };
     const squareInput: SquareTableItem = {
       turn_id: newTurn.turnId,
-      square: this.genAttr(board),
+      square: this.genAttr(newTurn.board.discs),
     };
     // ターンを保存する
     const params = {

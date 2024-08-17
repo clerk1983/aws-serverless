@@ -18,4 +18,8 @@ export class Board {
 
     return new Board(newDiscs);
   }
+
+  get discs(): Disc[][] {
+    return this._discs;
+  }
 }
