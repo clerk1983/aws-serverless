@@ -64,19 +64,37 @@ export class Board {
     const walledX = move.point.x + 1;
     const walledY = move.point.y + 1;
 
-    // 上
-    const flipCandidate: Point[] = [];
-    let cursorX = walledX;
-    let cursorY = walledY - 1;
-    while (isOppositeDisc(move.disc, this._walledDiscs[cursorY][cursorX])) {
-      // 番兵を考慮して - 1
-      flipCandidate.push(new Point(cursorX - 1, cursorY - 1));
-      cursorY--;
-      if (move.disc === this._walledDiscs[cursorY][cursorX]) {
-        flipPoints.push(...flipCandidate);
-        break;
+    const checkFlipPoints = (xMove: number, yMove: number) => {
+      let cursorX = walledX + xMove;
+      let cursorY = walledY + yMove;
+      let flipCandidate: Point[] = [];
+      while (isOppositeDisc(move.disc, this._walledDiscs[cursorY][cursorX])) {
+        flipCandidate.push(new Point(cursorX - 1, cursorY - 1));
+        cursorX += xMove;
+        cursorY += yMove;
+        if (move.disc === this._walledDiscs[cursorY][cursorX]) {
+          flipPoints.push(...flipCandidate);
+          break;
+        }
       }
-    }
+    };
+
+    // 上
+    checkFlipPoints(0, -1);
+    // 左上
+    checkFlipPoints(-1, -1);
+    // 左
+    checkFlipPoints(-1, 0);
+    // 左下
+    checkFlipPoints(-1, 1);
+    // 下
+    checkFlipPoints(0, 1);
+    // 右下
+    checkFlipPoints(1, 1);
+    // 右
+    checkFlipPoints(1, 0);
+    // 右上
+    checkFlipPoints(1, -1);
 
     return flipPoints;
   }
