@@ -62,6 +62,9 @@ export class Turn {
     return this._endAt;
   }
 }
-export const initialTurn = (game_id: string, end_at: string) => {
+export const initialTurn = (
+  game_id: string,
+  end_at = dayjs().toISOString(),
+) => {
   return new Turn(game_id, 0, Disc.Dark, undefined, INITIAL_BOARD, end_at);
 };

@@ -2,6 +2,19 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { TurnUsecase } from '../../application/TurnUsecase';
 import { ALLOW_CORS } from '../HandlerUtil';
 
+interface RequestBody {
+  turnCount: string;
+  move: {
+    x: string;
+    y: string;
+    disc: string;
+  };
+}
+/**
+ * ターン情報を登録する
+ * @param event
+ * @returns
+ */
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
@@ -14,11 +27,11 @@ export const handler = async (
       headers: ALLOW_CORS,
       body: JSON.stringify({ message: 'Invalid request' }),
     };
-  const body = JSON.parse(event.body);
+  const body: RequestBody = JSON.parse(event.body);
   const turnCount = parseInt(body.turnCount);
   const x = parseInt(body.move.x);
   const y = parseInt(body.move.y);
-  const disc = body.move.disc as string;
+  const disc = body.move.disc;
   console.info(`turnCount=${turnCount}, x=${x}, y=${y}, disc=${disc}`);
 
   try {

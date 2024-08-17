@@ -9,6 +9,11 @@ interface ResponseBody {
   winnerDisc?: string;
 }
 
+/**
+ * 指定したターンの情報を取得する
+ * @param event
+ * @returns
+ */
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
