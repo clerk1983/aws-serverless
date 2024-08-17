@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { GameUsecase } from '../../application/GameUsecase';
+import { GameUsecase } from '../../application/usecase/GameUsecase';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
 /**

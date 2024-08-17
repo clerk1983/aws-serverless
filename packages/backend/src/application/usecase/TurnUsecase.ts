@@ -1,6 +1,6 @@
-import { toDisc } from '../domain/model/turn/Disc';
-import { Point } from '../domain/model/turn/Point';
-import { TurnRepository } from '../domain/model/turn/TurnRepository';
+import { toDisc } from '../../domain/model/turn/Disc';
+import { Point } from '../../domain/model/turn/Point';
+import { TurnRepository } from '../../domain/model/turn/TurnRepository';
 
 interface FindTurnOutput {
   turnCount: number;

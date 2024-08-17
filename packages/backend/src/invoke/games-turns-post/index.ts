@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { TurnUsecase } from '../../application/TurnUsecase';
+import { TurnUsecase } from '../../application/usecase/TurnUsecase';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
 interface RequestBody {
