@@ -11,7 +11,7 @@
     "prepare": "husky",
     "build": "webpack --config webpack.config.js --mode development",
     "lint": "eslint . --fix",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "format": "prettier --write **/*.ts"
   },
   "packageManager": "yarn@4.4.0",
