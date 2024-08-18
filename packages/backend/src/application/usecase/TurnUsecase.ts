@@ -1,5 +1,5 @@
-import { GameResult } from '../../domain/model/gameResult/GameResult';
-import { GameResultRepository } from '../../domain/model/gameResult/GameResultRepository';
+import { GameResult } from '../../domain/model/game-result/GameResult';
+import { GameResultRepository } from '../../domain/model/game-result/GameResultRepository';
 import { Disc } from '../../domain/model/turn/Disc';
 import { Point } from '../../domain/model/turn/Point';
 import { TurnRepository } from '../../domain/model/turn/TurnRepository';

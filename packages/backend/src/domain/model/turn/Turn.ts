@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import uuid from 'ui7';
 import { DomainError } from '../../error/DomainError';
-import { WinnerDisc } from '../gameResult/WinnerDisc';
+import { WinnerDisc } from '../game-result/WinnerDisc';
 import { Board, INITIAL_BOARD } from './Board';
 import { Disc } from './Disc';
 import { Move } from './Move';
