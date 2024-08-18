@@ -6,17 +6,3 @@ services:
     ports:
       - '8000:8000'
     command: '-jar DynamoDBLocal.jar -sharedDb -inMemory'
-
-  dynamodb-init:
-    image: amazon/aws-cli
-    container_name: dynamodb-init
-    depends_on:
-      - dynamodb-local
-    command: >
-      sh -c "
-      aws dynamodb create-table --table-name TestTable \
-        --attribute-definitions AttributeName=id,AttributeType=S \
-        --key-schema AttributeName=id,KeyType=HASH \
-        --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-        --endpoint-url http://dynamodb-local:8000;
-      "
