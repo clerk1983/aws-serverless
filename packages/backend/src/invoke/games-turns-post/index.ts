@@ -50,6 +50,6 @@ export const handler = async (
       body: 'Created',
     };
   } catch (error) {
-    return errorResponse(error);
+    return errorResponse(error as Error);
   }
 };
