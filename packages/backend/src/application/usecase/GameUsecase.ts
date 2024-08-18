@@ -7,9 +7,10 @@ import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/Tur
  * ゲームユースケース
  */
 export class GameUsecase {
-  private gameRepository = new GameDynamoDBRepository();
-  private turnRepository = new TurnDynamoDBRepository();
-
+  constructor(
+    private gameRepository: GameDynamoDBRepository,
+    private turnRepository: TurnDynamoDBRepository,
+  ) {}
   /**
    * 新規ゲーム開始
    * @param game_id ゲームID

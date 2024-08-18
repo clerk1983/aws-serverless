@@ -1,5 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { GameUsecase } from '../../application/usecase/GameUsecase';
+import { GameDynamoDBRepository } from '../../infrastructure/repository/game/GameDynamoDBRepository';
+import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
 /**
@@ -20,7 +22,11 @@ export const handler = async (
     };
   }
   try {
-    await new GameUsecase().startNewGame(game_id);
+    const turnRepository = new TurnDynamoDBRepository();
+    const gameRepository = new GameDynamoDBRepository();
+    const gameUsecase = new GameUsecase(gameRepository, turnRepository);
+
+    await gameUsecase.startNewGame(game_id);
     return {
       statusCode: 201,
       headers: ALLOW_CORS,

@@ -2,6 +2,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { TurnUsecase } from '../../application/usecase/TurnUsecase';
 import { toDisc } from '../../domain/model/turn/Disc';
 import { Point } from '../../domain/model/turn/Point';
+import { GameResultDynamoDBRepository } from '../../infrastructure/repository/game-result/GameResultDynamoDBRepository';
+import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
 interface RequestBody {
@@ -38,7 +40,10 @@ export const handler = async (
     const point = new Point(x, y);
     const disc = toDisc(body.move.disc);
 
-    await new TurnUsecase().registerTurn(game_id, turnCount, point, disc);
+    const turnRepository = new TurnDynamoDBRepository();
+    const gameResultRepository = new GameResultDynamoDBRepository();
+    const turnUsecase = new TurnUsecase(turnRepository, gameResultRepository);
+    await turnUsecase.registerTurn(game_id, turnCount, point, disc);
     return {
       statusCode: 201,
       headers: ALLOW_CORS,

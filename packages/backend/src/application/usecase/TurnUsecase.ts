@@ -1,9 +1,8 @@
 import { GameResult } from '../../domain/model/game-result/GameResult';
+import { GameResultRepository } from '../../domain/model/game-result/GameResultRepository';
 import { Disc } from '../../domain/model/turn/Disc';
 import { Point } from '../../domain/model/turn/Point';
-import { GameResultDynamoDBRepository } from '../../infrastructure/repository/game-result/GameResultDynamoDBRepository';
-import { GameDynamoDBRepository } from '../../infrastructure/repository/game/GameDynamoDBRepository';
-import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
+import { TurnRepository } from '../../domain/model/turn/TurnRepository';
 
 interface FindTurnOutput {
   turnCount: number;
@@ -15,9 +14,10 @@ interface FindTurnOutput {
  * ターンユースケース
  */
 export class TurnUsecase {
-  private gameRepository = new GameDynamoDBRepository();
-  private turnRepository = new TurnDynamoDBRepository();
-  private gameResultRepository = new GameResultDynamoDBRepository();
+  constructor(
+    private turnRepository: TurnRepository,
+    private gameResultRepository: GameResultRepository,
+  ) {}
 
   /**
    * ターンを取得する

@@ -1,5 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { TurnUsecase } from '../../application/usecase/TurnUsecase';
+import { GameResultDynamoDBRepository } from '../../infrastructure/repository/game-result/GameResultDynamoDBRepository';
+import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
 interface ResponseBody {
@@ -27,8 +29,11 @@ export const handler = async (
       body: JSON.stringify({ message: 'Invalid request' }),
     };
   }
+  const turnRepository = new TurnDynamoDBRepository();
+  const gameResultRepository = new GameResultDynamoDBRepository();
+  const turnUsecase = new TurnUsecase(turnRepository, gameResultRepository);
   try {
-    const resBody: ResponseBody = await new TurnUsecase().findTurn(
+    const resBody: ResponseBody = await turnUsecase.findTurn(
       game_id,
       turn_count,
     );
