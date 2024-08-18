@@ -4,6 +4,10 @@ import { GameDynamoDBRepository } from '../../infrastructure/repository/game/Gam
 import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
+interface PathParameters {
+  gameId?: string;
+}
+
 /**
  * POST /tasks
  * ゲーム開始
@@ -13,7 +17,8 @@ import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  const game_id = event.pathParameters?.gameId;
+  const req = event.pathParameters as PathParameters;
+  const game_id = req.gameId;
   if (!game_id) {
     return {
       statusCode: 400,

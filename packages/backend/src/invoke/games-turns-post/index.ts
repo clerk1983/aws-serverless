@@ -6,6 +6,10 @@ import { GameResultDynamoDBRepository } from '../../infrastructure/repository/ga
 import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
+interface PathParameters {
+  gameId?: string;
+}
+
 interface RequestBody {
   turnCount: string;
   move: {
@@ -24,7 +28,8 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     console.info(`event=${JSON.stringify(event)}`);
-    const game_id = event.pathParameters?.gameId;
+    const params = event.pathParameters as PathParameters;
+    const game_id = params.gameId;
     console.info(`game_id=${game_id}`);
     if (!game_id || !event.body) {
       return {

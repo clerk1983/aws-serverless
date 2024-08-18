@@ -4,6 +4,11 @@ import { GameResultDynamoDBRepository } from '../../infrastructure/repository/ga
 import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
 import { ALLOW_CORS, errorResponse } from '../HandlerUtil';
 
+interface PathParameters {
+  gameId?: string;
+  turnCount?: string;
+}
+
 interface ResponseBody {
   turnCount: number;
   board: string[][];
@@ -19,8 +24,9 @@ interface ResponseBody {
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  const game_id = event.pathParameters?.gameId;
-  const turn_count = parseInt(event.pathParameters?.turnCount ?? '');
+  const params = event.pathParameters as PathParameters;
+  const game_id = params.gameId;
+  const turn_count = parseInt(params.turnCount ?? '');
   console.info(`game_id=${game_id}, turn_count=${turn_count}`);
   if (!game_id || isNaN(turn_count)) {
     return {
