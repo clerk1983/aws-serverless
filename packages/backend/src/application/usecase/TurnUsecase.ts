@@ -1,8 +1,9 @@
 import { GameResult } from '../../domain/model/game-result/GameResult';
-import { GameResultRepository } from '../../domain/model/game-result/GameResultRepository';
 import { Disc } from '../../domain/model/turn/Disc';
 import { Point } from '../../domain/model/turn/Point';
-import { TurnRepository } from '../../domain/model/turn/TurnRepository';
+import { GameResultDynamoDBRepository } from '../../infrastructure/repository/game-result/GameResultDynamoDBRepository';
+import { GameDynamoDBRepository } from '../../infrastructure/repository/game/GameDynamoDBRepository';
+import { TurnDynamoDBRepository } from '../../infrastructure/repository/turn/TurnDynamoDBRepository';
 
 interface FindTurnOutput {
   turnCount: number;
@@ -14,6 +15,10 @@ interface FindTurnOutput {
  * ターンユースケース
  */
 export class TurnUsecase {
+  private gameRepository = new GameDynamoDBRepository();
+  private turnRepository = new TurnDynamoDBRepository();
+  private gameResultRepository = new GameResultDynamoDBRepository();
+
   /**
    * ターンを取得する
    * @param game_id ゲームID
@@ -21,9 +26,9 @@ export class TurnUsecase {
    */
   async findTurn(game_id: string, turn_count: number): Promise<FindTurnOutput> {
     // リポジトリから取得
-    const turn = await new TurnRepository().findTurn(game_id, turn_count);
+    const turn = await this.turnRepository.findTurn(game_id, turn_count);
     let gameResult: GameResult | undefined;
-    gameResult = await new GameResultRepository().find(game_id);
+    gameResult = await this.gameResultRepository.find(game_id);
     const res: FindTurnOutput = {
       turnCount: Number(turn_count),
       board: turn.board.discs,
@@ -48,7 +53,7 @@ export class TurnUsecase {
   ): Promise<void> {
     // 1つ前のターンリポジトリから取得する
     const previousTurnCount = turnCount - 1;
-    const previousTurn = await new TurnRepository().findTurn(
+    const previousTurn = await this.turnRepository.findTurn(
       game_id,
       previousTurnCount,
     );
@@ -57,14 +62,14 @@ export class TurnUsecase {
     const newTurn = previousTurn.placeNext(disc, point);
 
     // ターンを保存する
-    await new TurnRepository().save(newTurn);
+    await this.turnRepository.save(newTurn);
 
     // 勝敗が決した場合、勝敗を保存
     if (newTurn.gameEnded()) {
       const winnerDisc = newTurn.winnerDisc();
       console.info(`winnerDisc: ${winnerDisc}`);
       const gameResult = new GameResult(game_id, winnerDisc, newTurn.endAt);
-      await new GameResultRepository().save(gameResult);
+      await this.gameResultRepository.save(gameResult);
     }
   }
 }

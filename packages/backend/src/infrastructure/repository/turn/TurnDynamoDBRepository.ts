@@ -10,6 +10,7 @@ import { Disc, toDisc } from '../../../domain/model/turn/Disc';
 import { Move } from '../../../domain/model/turn/Move';
 import { Point } from '../../../domain/model/turn/Point';
 import { Turn } from '../../../domain/model/turn/Turn';
+import { TurnRepository } from '../../../domain/model/turn/TurnRepository';
 
 interface TurnsTableItem {
   game_id: string;
@@ -44,7 +45,7 @@ interface SquareTableKey {
 /**
  * Turn リポジトリ
  */
-export class TurnDynamoDBRepository {
+export class TurnDynamoDBRepository implements TurnRepository {
   private dynamoDb = new DynamoDBClient({ region: 'ap-northeast-1' });
 
   /**

@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { GameResult } from '../../../domain/model/game-result/GameResult';
+import { GameResultRepository } from '../../../domain/model/game-result/GameResultRepository';
 
 interface GamesTableItem {
   winner_disc?: string;
@@ -21,7 +22,7 @@ interface GamesTableKey {
 /**
  * GameResult リポジトリ
  */
-export class GameResultDynamoDBRepository {
+export class GameResultDynamoDBRepository implements GameResultRepository {
   private dynamoDb = new DynamoDBClient({ region: 'ap-northeast-1' });
 
   /**

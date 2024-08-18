@@ -1,6 +1,7 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { Game } from '../../../domain/model/game/Game';
+import { GameRepository } from '../../../domain/model/game/GameRepository';
 
 interface GamesTableItem {
   game_id: string;
@@ -10,7 +11,7 @@ interface GamesTableItem {
 /**
  * Game リポジトリ
  */
-export class GameDynamoDBRepository {
+export class GameDynamoDBRepository implements GameRepository {
   private dynamoDb = new DynamoDBClient({ region: 'ap-northeast-1' });
 
   /**
